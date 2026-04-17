@@ -154,6 +154,71 @@ body{
 .chk:checked{background:var(--accent);border-color:var(--accent);}
 .chk:checked::after{content:'✓';position:absolute;left:4px;top:0px;font-size:.75rem;color:#000;font-weight:900;}
 
+/* ───── EXPIRED MISSIONS ───── */
+.expired-banner{
+  background:linear-gradient(135deg,rgba(220,38,38,.12),rgba(239,68,68,.06));
+  border:1px solid rgba(239,68,68,.4);border-radius:16px;
+  padding:14px 16px;margin-bottom:14px;
+}
+.expired-banner-title{
+  font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:2px;
+  color:#ef4444;margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.expired-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.52rem;font-weight:900;padding:3px 8px;border-radius:6px;margin-top:5px;
+  letter-spacing:.5px;background:rgba(239,68,68,.18);color:#ef4444;border:1px solid rgba(239,68,68,.4);
+}
+.mission-card.expired-card{
+  opacity:.7;border-left-color:#ef4444!important;
+  background:linear-gradient(135deg,rgba(220,38,38,.05),transparent);
+  position:relative;overflow:visible;
+}
+.mission-card.expired-card::after{
+  content:'EXPIRED';position:absolute;top:-8px;right:12px;
+  background:#ef4444;color:#fff;font-size:.45rem;font-weight:900;
+  padding:2px 8px;border-radius:4px;letter-spacing:1.5px;
+  font-family:'Orbitron',sans-serif;
+}
+.missed-stamp{
+  display:inline-block;font-size:.52rem;font-weight:900;padding:2px 8px;
+  border-radius:5px;margin-top:4px;letter-spacing:.5px;
+  background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.35);
+}
+/* Live clock badge on active mission */
+.mission-live{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.55rem;font-weight:900;color:var(--accent);margin-top:5px;
+  letter-spacing:.5px;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;background:#22c55e;
+  animation:pulse-dot 1.4s ease-in-out infinite;flex-shrink:0;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.4;transform:scale(.7);}
+}
+/* Expiry warning - turns orange when <3 days left */
+.mission-live.warning{color:#f97316;}
+.mission-live.warning .live-dot{background:#f97316;}
+/* Section header for expired */
+.expired-section-title{
+  font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:2px;
+  color:#ef4444;margin:16px 0 10px;display:flex;align-items:center;gap:8px;
+}
+.expired-section-title::after{
+  content:'';flex:1;height:1px;background:rgba(239,68,68,.3);
+}
+/* Dismiss button for expired section */
+.dismiss-expired-btn{
+  width:100%;padding:10px;border-radius:10px;margin-top:6px;
+  border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);
+  color:#ef4444;font-size:.72rem;font-weight:900;cursor:pointer;
+  font-family:'Quicksand',sans-serif;letter-spacing:.5px;transition:.15s;
+}
+.dismiss-expired-btn:active{transform:scale(.97);}
+
 /* ───── TIMELINE ───── */
 .phase-tabs{display:flex;gap:8px;padding:12px 16px;position:sticky;top:0;z-index:5;background:transparent;border-bottom:none;}
 
@@ -1350,7 +1415,20 @@ const masterData=[
 // ═══════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════
-let tasks = JSON.parse(localStorage.getItem('hs_tasks_v37')) || masterData.map(t=>({...t,done:false}));
+let tasks = JSON.parse(localStorage.getItem('hs_tasks_v38')) || masterData.map(t=>({...t,done:false}));
+// Migrate old completed states from previous version
+(()=>{
+  const old = JSON.parse(localStorage.getItem('hs_tasks_v38')||'null');
+  if(old){
+    old.forEach(ot=>{
+      if(ot.done){
+        const match = tasks.find(t=>t.topic===ot.topic&&t.sub===ot.sub);
+        if(match) match.done=true;
+      }
+    });
+    localStorage.setItem('hs_tasks_v38',JSON.stringify(tasks));
+  }
+})();
 let currentPage='dashboard';
 let currentSubject='phy';
 let currentPhase='Phase 1';
@@ -1415,53 +1493,139 @@ function updateDashboard() {
   updateActiveMissions();
 }
 
+// Track dismissed expired missions (session only)
+let dismissedExpired = new Set(JSON.parse(sessionStorage.getItem('dismissedExpired')||'[]'));
+
+// Parse date string as LOCAL midnight (avoids UTC offset bug in IST/any timezone)
+function parseLocalDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d, 0, 0, 0, 0);
+}
+
+function getDaysLeft(endDateStr) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const end = parseLocalDate(endDateStr);
+  return Math.ceil((end - now) / 86400000);
+}
+
+function getLiveCountdown(endDateStr) {
+  const now = new Date();
+  const end = parseLocalDate(endDateStr);
+  end.setHours(23,59,59,999);
+  const diff = end - now;
+  if (diff <= 0) return null;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  if (h >= 48) {
+    const d = Math.ceil(diff / 86400000);
+    return { text: `${d}d left`, urgent: d <= 3 };
+  }
+  return { text: `${h}h ${m}m left`, urgent: true };
+}
+
 function updateActiveMissions() {
   const container = document.getElementById('activeMissions');
   if (!container) return;
-  
-  const now = new Date();
-  now.setHours(0,0,0,0);
 
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  // Separate: currently active, recently expired (not done, not dismissed), upcoming
   const active = tasks.filter(t => {
-    const s = new Date(t.start), e = new Date(t.end);
+    const s = parseLocalDate(t.start), e = parseLocalDate(t.end);
     return now >= s && now <= e;
   });
 
-  if (active.length === 0) {
-    container.innerHTML = `
-      <div class="mission-card">
-        <div class="mission-icon">✨</div>
+  // Expired = past end date, not completed, not dismissed
+  const recentlyExpired = tasks.filter(t => {
+    const e = parseLocalDate(t.end);
+    const key = t.topic+'|'+t.sub;
+    const daysPast = Math.ceil((now - e) / 86400000);
+    return now > e && !t.done && daysPast <= 14 && !dismissedExpired.has(key);
+  });
+
+  let html = '';
+
+  // ── ACTIVE MISSIONS ──
+  if (active.length === 0 && recentlyExpired.length === 0) {
+    html = `<div class="mission-card">
+      <div class="mission-icon">✨</div>
+      <div class="mission-body">
+        <div class="mission-sub">NO ACTIVE MISSIONS</div>
+        <div class="mission-topic">Check the Timeline for your schedule!</div>
+      </div>
+    </div>`;
+  } else {
+    active.forEach(t => {
+      const col = getSubCol(t.sub);
+      const icon = getSubIcon(t.sub);
+      const countdown = getLiveCountdown(t.end);
+      const liveHtml = countdown
+        ? `<div class="mission-live ${countdown.urgent?'warning':''}">
+            <span class="live-dot"></span>${countdown.text.toUpperCase()}
+           </div>`
+        : '';
+      html += `<div class="mission-card" style="border-left:3px solid ${col}">
+        <div class="mission-icon">${icon}</div>
         <div class="mission-body">
-          <div class="mission-sub">NO ACTIVE MISSIONS</div>
-          <div class="mission-topic">Check the Timeline for your schedule!</div>
+          <div class="mission-sub" style="color:${col}">${t.sub.toUpperCase()}</div>
+          <div class="mission-topic" style="${t.done?'opacity:.35;text-decoration:line-through':''}">${t.topic}</div>
+          <div class="mission-date">📅 ${fmtDate(t.start)} – ${fmtDate(t.end)}</div>
+          <span class="mission-pill" style="background:${col}22;color:${col};border:1px solid ${col}40">${t.phase} · ${t.dur} WINDOW</span>
+          ${liveHtml}
         </div>
+        <input type="checkbox" class="chk" ${t.done?'checked':''} onchange="toggleMissionByTopic('${t.topic.replace(/'/g,"\\'")}','${t.sub}',this.checked)">
       </div>`;
-    return;
+    });
+
+    // ── EXPIRED (MISSED) MISSIONS ──
+    if (recentlyExpired.length > 0) {
+      html += `<div class="expired-section-title">⚠️ MISSED MISSIONS</div>`;
+      recentlyExpired.forEach(t => {
+        const col = '#ef4444';
+        const icon = getSubIcon(t.sub);
+        const daysPast = Math.ceil((now - parseLocalDate(t.end)) / 86400000);
+        const key = t.topic+'|'+t.sub;
+        html += `<div class="mission-card expired-card" style="border-left:3px solid ${col}">
+          <div class="mission-icon" style="filter:grayscale(.5)">${icon}</div>
+          <div class="mission-body">
+            <div class="mission-sub" style="color:${col}">${t.sub.toUpperCase()}</div>
+            <div class="mission-topic" style="opacity:.6;text-decoration:line-through">${t.topic}</div>
+            <div class="mission-date">📅 ${fmtDate(t.start)} – ${fmtDate(t.end)}</div>
+            <span class="missed-stamp">❌ NOT COMPLETED · ${daysPast}d AGO</span>
+          </div>
+          <button onclick="dismissExpiredMission('${key.replace(/'/g,"\\'")}','${t.topic.replace(/'/g,"\\'")}','${t.sub}')" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--muted);flex-shrink:0;padding:4px;" title="Dismiss">✕</button>
+        </div>`;
+      });
+      html += `<button class="dismiss-expired-btn" onclick="dismissAllExpired()">✕ Dismiss All Missed Missions</button>`;
+    }
   }
 
-  container.innerHTML = active.map(t => {
-    const col = getSubCol(t.sub);
-    const icon = getSubIcon(t.sub);
-    return `<div class="mission-card" style="border-left:3px solid ${col}">
-      <div class="mission-icon">${icon}</div>
-      <div class="mission-body">
-        <div class="mission-sub" style="color:${col}">${t.sub.toUpperCase()}</div>
-        <div class="mission-topic" style="${t.done?'opacity:.35;text-decoration:line-through':''}">${t.topic}</div>
-        <div class="mission-date">📅 ${fmtDate(t.start)} – ${fmtDate(t.end)}</div>
-        <span class="mission-pill" style="background:${col}22;color:${col};border:1px solid ${col}40">${t.phase} · ${t.dur} WINDOW</span>
-      </div>
-      <input type="checkbox" class="chk" ${t.done?'checked':''} onchange="toggleMissionByTopic('${t.topic}','${t.sub}',this.checked)">
-    </div>`;
-  }).join('');
+  container.innerHTML = html;
+}
+
+function dismissExpiredMission(key, topic, sub) {
+  dismissedExpired.add(key);
+  sessionStorage.setItem('dismissedExpired', JSON.stringify([...dismissedExpired]));
+  updateActiveMissions();
+}
+
+function dismissAllExpired() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  tasks.forEach(t => {
+    const e = parseLocalDate(t.end);
+    if(now > e && !t.done) dismissedExpired.add(t.topic+'|'+t.sub);
+  });
+  sessionStorage.setItem('dismissedExpired', JSON.stringify([...dismissedExpired]));
+  updateActiveMissions();
 }
 
 function toggleMissionByTopic(topic,sub,done){
   const t=tasks.find(x=>x.topic===topic&&x.sub===sub);
-  if(t){t.done=done;localStorage.setItem('hs_tasks_v37',JSON.stringify(tasks));updateActiveMissions();}
+  if(t){t.done=done;localStorage.setItem('hs_tasks_v38',JSON.stringify(tasks));updateActiveMissions();}
 }
 
-// Update dashboard every minute
-setInterval(updateDashboard, 60000);
+// Update dashboard every 30s for live countdown accuracy
+setInterval(updateDashboard, 30000);
 
 // ═══════════════════════════════════════
 // OVERALL PROGRESS GRAPHIC
@@ -1522,8 +1686,8 @@ function renderProgress(){
   }
 
   // Timeline bar
-  const schedStart=new Date('2026-04-11');
-  const schedEnd=new Date('2026-12-01');
+  const schedStart=parseLocalDate('2026-04-11');
+  const schedEnd=parseLocalDate('2026-12-01');
   const now=new Date();
   const totalMs=schedEnd-schedStart;
   const elapsed=Math.max(0,Math.min(now-schedStart,totalMs));
@@ -1744,13 +1908,13 @@ function renderTimeline(){
 
 function toggleMission(idx,done){
   tasks[idx].done=done;
-  localStorage.setItem('hs_tasks_v37',JSON.stringify(tasks));
+  localStorage.setItem('hs_tasks_v38',JSON.stringify(tasks));
   updateActiveMissions();
 }
 
 function getSubCol(s){return s==='Physics'?'var(--phy)':s==='Chemistry'?'var(--chem)':'var(--bio)';}
 function getSubIcon(s){return s==='Physics'?'⚛️':s==='Chemistry'?'🧪':'🧬';}
-function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}
+function fmtDate(d){return parseLocalDate(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}
 
 // ═══════════════════════════════════════
 // NOTES CHAPTERS
