@@ -827,14 +827,11 @@ body{
 .streak-lbl{font-size:.6rem;color:var(--muted);font-weight:900;letter-spacing:.5px;}
 
 /* ═══════════════════════════════════════
-   HIDE FLOATING BUTTONS ON TIMELINE & NOTES
+   HIDE TASK FAB ON TIMELINE, NOTES & EDITOR
    ═══════════════════════════════════════ */
 body.page-timeline .fab-task,
 body.page-notes .fab-task,
-body.page-timeline #ai-fab,
-body.page-notes #ai-fab,
-body.page-timeline #ai-chat,
-body.page-notes #ai-chat {
+body.page-editor .fab-task {
   display: none !important;
 }
 
