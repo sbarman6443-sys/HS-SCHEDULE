@@ -9,7 +9,7 @@
 <!-- Android status bar color — light mode -->
 <meta name="theme-color" content="#f0f6ff" media="(prefers-color-scheme: light)">
 
-<title>HS SCHEDULE v41.0</title>
+<title>HS SCHEDULE v42.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Quicksand:wght@500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1056,6 +1056,24 @@ body.page-editor .fab-task {
   font-family:'Quicksand',sans-serif;transition:.15s;letter-spacing:1px;
 }
 .onboarding-btn:active{transform:scale(.98);}
+
+/* ───── ADD CHAPTER ───── */
+.add-chapter-btn{
+  width:100%;padding:13px;border-radius:14px;margin-bottom:14px;
+  border:1px dashed var(--accent);background:rgba(251,191,36,.08);color:var(--accent);
+  font-size:.75rem;font-weight:900;letter-spacing:1px;cursor:pointer;
+  font-family:'Quicksand',sans-serif;transition:.15s;
+}
+.add-chapter-btn:active{transform:scale(.97);}
+.chap-acts{display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.chap-act{
+  width:26px;height:26px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--muted);font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.chap-act:hover{color:var(--accent);border-color:var(--accent);}
+.chap-act.del:hover{color:#ef4444;border-color:#ef4444;}
+select.edit-input{appearance:auto;}
 </style>
 </head>
 <body>
@@ -1106,7 +1124,7 @@ body.page-editor .fab-task {
   <!-- NOTES PAGE -->
   <div id="page-notes" class="page">
     <div class="notes-hero">
-      <div class="notes-hero-title">📚 CHAPTER NOTES</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;"><div class="notes-hero-title" style="margin-bottom:0;">📚 CHAPTER NOTES</div><button class="add-chapter-btn" style="width:auto;margin:0;padding:8px 14px;" onclick="openChapterDialog()">＋ ADD</button></div>
       <input type="text" class="notes-search" placeholder="Search chapters..." oninput="searchChapters(this.value)">
       <div class="sub-tabs">
         <button class="sub-tab active-phy" onclick="filterSubject('phy',event)">PHYSICS</button>
@@ -1355,8 +1373,8 @@ body.page-editor .fab-task {
             <div id="todayMarker" style="position:absolute;top:0;bottom:0;width:2px;background:var(--accent);border-radius:2px;transition:left 1s ease;left:0%;"></div>
           </div>
           <div style="display:flex;justify-content:space-between;margin-top:4px;">
-            <span style="font-size:.5rem;color:var(--muted);">Apr 2026</span>
-            <span style="font-size:.5rem;color:var(--muted);">Dec 2026</span>
+            <span id="tlStartLbl" style="font-size:.5rem;color:var(--muted);">—</span>
+            <span id="tlEndLbl" style="font-size:.5rem;color:var(--muted);">—</span>
           </div>
         </div>
       </div>
@@ -1540,6 +1558,50 @@ body.page-editor .fab-task {
   </div>
 </div>
 
+<!-- ADD / EDIT CHAPTER OVERLAY -->
+<div class="edit-overlay" id="chapterOverlay" onclick="globalClick(event)">
+  <div class="edit-card">
+    <div class="edit-header">
+      <div class="edit-title" id="chDialogTitle">➕ ADD CHAPTER</div>
+      <button class="edit-close" onclick="closeChapterDialog()">✕</button>
+    </div>
+    <div class="edit-field">
+      <div class="edit-label">SUBJECT</div>
+      <select class="edit-input" id="chSub" onchange="onChapterSubjectChange()">
+        <option>Physics</option><option>Chemistry</option><option>Biology</option>
+      </select>
+    </div>
+    <div class="edit-field">
+      <div class="edit-label">CHAPTER NAME</div>
+      <input type="text" class="edit-input" id="chName" placeholder="e.g., Current Electricity" maxlength="100">
+    </div>
+    <div class="edit-field">
+      <div class="edit-label">PHASE</div>
+      <select class="edit-input" id="chPhase">
+        <option>Phase 1</option><option>Phase 2</option><option>Phase 3</option><option>Phase 4</option>
+      </select>
+    </div>
+    <div class="edit-field">
+      <div class="edit-label">START DATE</div>
+      <input type="date" class="edit-input" id="chStart" oninput="updateChapterEnd()">
+    </div>
+    <div class="edit-field">
+      <div class="edit-label">DURATION</div>
+      <div style="display:flex;gap:10px;">
+        <input type="number" class="edit-input" id="chDur" min="1" value="7" oninput="updateChapterEnd()" style="flex:1;">
+        <select class="edit-input" id="chUnit" onchange="updateChapterEnd()" style="flex:1;">
+          <option value="d">Days</option><option value="w">Weeks</option>
+        </select>
+      </div>
+      <div id="chEndPreview" style="font-size:.7rem;color:var(--accent);margin-top:8px;font-weight:800;">—</div>
+    </div>
+    <div class="edit-actions">
+      <button class="edit-btn" onclick="closeChapterDialog()">Cancel</button>
+      <button class="edit-btn primary" onclick="saveChapter()">Save Chapter</button>
+    </div>
+  </div>
+</div>
+
 <!-- ONBOARDING -->
 <div class="onboarding" id="onboarding" style="display:none;">
   <div class="onboarding-card">
@@ -1649,63 +1711,15 @@ function toggleToolbarSize(){
 // ═══════════════════════════════════════
 // MASTER DATA
 // ═══════════════════════════════════════
-const masterData=[
-  {phase:"Phase 1",start:"2026-04-11",end:"2026-04-25",sub:"Physics",topic:"Electric Charges & Fields",dur:"15D"},
-  {phase:"Phase 1",start:"2026-04-26",end:"2026-05-10",sub:"Physics",topic:"Electrostatic Potential & Capacitance",dur:"15D"},
-  {phase:"Phase 1",start:"2026-05-11",end:"2026-05-25",sub:"Physics",topic:"Current Electricity",dur:"15D"},
-  {phase:"Phase 1",start:"2026-05-26",end:"2026-06-13",sub:"Physics",topic:"Moving Charges & Magnetism",dur:"19D"},
-  {phase:"Phase 2",start:"2026-06-14",end:"2026-06-25",sub:"Physics",topic:"Magnetism & Matter",dur:"12D"},
-  {phase:"Phase 2",start:"2026-06-26",end:"2026-07-12",sub:"Physics",topic:"Electromagnetic Induction",dur:"17D"},
-  {phase:"Phase 2",start:"2026-07-13",end:"2026-07-28",sub:"Physics",topic:"Alternating Current",dur:"16D"},
-  {phase:"Phase 2",start:"2026-07-29",end:"2026-08-08",sub:"Physics",topic:"Electromagnetic Waves",dur:"11D"},
-  {phase:"Phase 3",start:"2026-08-09",end:"2026-08-31",sub:"Physics",topic:"Ray Optics",dur:"23D"},
-  {phase:"Phase 3",start:"2026-09-01",end:"2026-09-18",sub:"Physics",topic:"Wave Optics",dur:"18D"},
-  {phase:"Phase 3",start:"2026-09-19",end:"2026-10-03",sub:"Physics",topic:"Dual Nature",dur:"15D"},
-  {phase:"Phase 4",start:"2026-10-04",end:"2026-10-18",sub:"Physics",topic:"Atoms",dur:"15D"},
-  {phase:"Phase 4",start:"2026-10-19",end:"2026-10-29",sub:"Physics",topic:"Nuclei",dur:"11D"},
-  {phase:"Phase 4",start:"2026-10-30",end:"2026-11-15",sub:"Physics",topic:"Semiconductor Electronics",dur:"17D"},
-  {phase:"Phase 1",start:"2026-04-11",end:"2026-05-02",sub:"Chemistry",topic:"Solutions",dur:"22D"},
-  {phase:"Phase 1",start:"2026-05-03",end:"2026-05-25",sub:"Chemistry",topic:"Electrochemistry",dur:"23D"},
-  {phase:"Phase 1",start:"2026-05-26",end:"2026-06-12",sub:"Chemistry",topic:"Haloalkanes & Haloarenes",dur:"18D"},
-  {phase:"Phase 2",start:"2026-06-13",end:"2026-07-02",sub:"Chemistry",topic:"d & f-Block Elements",dur:"20D"},
-  {phase:"Phase 2",start:"2026-07-03",end:"2026-07-23",sub:"Chemistry",topic:"Chemical Kinetics",dur:"21D"},
-  {phase:"Phase 2",start:"2026-07-24",end:"2026-08-10",sub:"Chemistry",topic:"Alcohols, Phenols & Ethers",dur:"18D"},
-  {phase:"Phase 3",start:"2026-08-11",end:"2026-08-31",sub:"Chemistry",topic:"Coordination Compounds",dur:"21D"},
-  {phase:"Phase 3",start:"2026-09-01",end:"2026-09-25",sub:"Chemistry",topic:"Aldehydes, Ketones & Carboxylic Acids",dur:"25D"},
-  {phase:"Phase 4",start:"2026-09-26",end:"2026-10-10",sub:"Chemistry",topic:"Amines",dur:"15D"},
-  {phase:"Phase 4",start:"2026-10-11",end:"2026-10-31",sub:"Chemistry",topic:"Biomolecules",dur:"21D"},
-  {phase:"Phase 1",start:"2026-04-17",end:"2026-04-30",sub:"Biology",topic:"Sexual Reproduction in Flowering Plants",dur:"14D"},
-  {phase:"Phase 1",start:"2026-05-01",end:"2026-05-20",sub:"Biology",topic:"Human Reproduction",dur:"20D"},
-  {phase:"Phase 1",start:"2026-05-21",end:"2026-06-05",sub:"Biology",topic:"Reproductive Health",dur:"16D"},
-  {phase:"Phase 2",start:"2026-06-06",end:"2026-06-25",sub:"Biology",topic:"Principles of Inheritance & Variation",dur:"20D"},
-  {phase:"Phase 2",start:"2026-06-26",end:"2026-07-15",sub:"Biology",topic:"Molecular Basis of Inheritance",dur:"20D"},
-  {phase:"Phase 2",start:"2026-07-16",end:"2026-08-01",sub:"Biology",topic:"Evolution",dur:"17D"},
-  {phase:"Phase 3",start:"2026-08-02",end:"2026-08-20",sub:"Biology",topic:"Human Health & Disease",dur:"19D"},
-  {phase:"Phase 3",start:"2026-08-21",end:"2026-09-05",sub:"Biology",topic:"Microbes in Human Welfare",dur:"16D"},
-  {phase:"Phase 3",start:"2026-09-06",end:"2026-09-20",sub:"Biology",topic:"Biotechnology: Principles & Processes",dur:"15D"},
-  {phase:"Phase 4",start:"2026-09-21",end:"2026-10-05",sub:"Biology",topic:"Biotechnology & Its Applications",dur:"15D"},
-  {phase:"Phase 4",start:"2026-10-06",end:"2026-10-20",sub:"Biology",topic:"Organisms & Populations",dur:"15D"},
-  {phase:"Phase 4",start:"2026-10-21",end:"2026-11-05",sub:"Biology",topic:"Ecosystem",dur:"16D"},
-  {phase:"Phase 4",start:"2026-11-06",end:"2026-12-01",sub:"Biology",topic:"Biodiversity & Conservation",dur:"26D"}
-];
+const masterData=[];
 
 // ═══════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════
-let tasks = JSON.parse(localStorage.getItem('hs_tasks_v38')) || masterData.map(t=>({...t,done:false}));
-// Migrate old completed states from previous version
-(()=>{
-  const old = JSON.parse(localStorage.getItem('hs_tasks_v38')||'null');
-  if(old){
-    old.forEach(ot=>{
-      if(ot.done){
-        const match = tasks.find(t=>t.topic===ot.topic&&t.sub===ot.sub);
-        if(match) match.done=true;
-      }
-    });
-    localStorage.setItem('hs_tasks_v38',JSON.stringify(tasks));
-  }
-})();
+const TASKS_KEY='hs_tasks_v42';
+let tasks=[];
+try{tasks=JSON.parse(localStorage.getItem(TASKS_KEY))||[];}catch(e){tasks=[];}
+function saveTasks(){localStorage.setItem(TASKS_KEY,JSON.stringify(tasks));}
 let currentPage='dashboard';
 let currentSubject='phy';
 let currentPhase='Phase 1';
@@ -1828,7 +1842,7 @@ function updateActiveMissions() {
       <div class="mission-icon">✨</div>
       <div class="mission-body">
         <div class="mission-sub">NO ACTIVE MISSIONS</div>
-        <div class="mission-topic">Check the Timeline for your schedule!</div>
+        <div class="mission-topic">Add chapters in the Timeline tab!</div>
       </div>
     </div>`;
   } else {
@@ -2045,7 +2059,7 @@ function dismissAllExpired() {
 
 function toggleMissionByTopic(topic,sub,done){
   const t=tasks.find(x=>x.topic===topic&&x.sub===sub);
-  if(t){t.done=done;localStorage.setItem('hs_tasks_v38',JSON.stringify(tasks));updateActiveMissions();renderProgress();if(typeof _activityLogToday==='function')_activityLogToday();}
+  if(t){t.done=done;saveTasks();updateActiveMissions();renderProgress();if(typeof _activityLogToday==='function')_activityLogToday();}
 }
 
 // Update dashboard every 30s for live countdown accuracy
@@ -2110,8 +2124,9 @@ function renderProgress(){
   }
 
   // Timeline bar
-  const schedStart=parseLocalDate('2026-04-11');
-  const schedEnd=parseLocalDate('2026-12-01');
+  const _st=tasks.map(t=>parseLocalDate(t.start)),_en=tasks.map(t=>parseLocalDate(t.end));
+  const schedStart=_st.length?new Date(Math.min(..._st)):new Date();
+  const schedEnd=_en.length?new Date(Math.max(..._en)):new Date(schedStart.getTime()+86400000);
   const now=new Date();
   const totalMs=schedEnd-schedStart;
   const elapsed=Math.max(0,Math.min(now-schedStart,totalMs));
@@ -2119,6 +2134,9 @@ function renderProgress(){
   if(el('timelineBar'))el('timelineBar').style.width=timePct+'%';
   if(el('todayMarker'))el('todayMarker').style.left=timePct+'%';
   if(el('timelinePct'))el('timelinePct').textContent=timePct+'% elapsed';
+  const _fm=d=>d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+  if(el('tlStartLbl'))el('tlStartLbl').textContent=tasks.length?_fm(schedStart):'—';
+  if(el('tlEndLbl'))el('tlEndLbl').textContent=tasks.length?_fm(schedEnd):'—';
 }
 
 // ═══════════════════════════════════════
@@ -2302,24 +2320,24 @@ function switchPhase(phase){
 }
 
 function renderTimeline(){
-  const phases=[...new Set(masterData.map(t=>t.phase))].sort();
+  const phases=[...new Set(tasks.map(t=>t.phase))].sort();
+  if(phases.length&&!phases.includes(currentPhase))currentPhase=phases[0];
   document.getElementById('phaseTabs').innerHTML=phases.map(p=>
     `<button class="phase-pill ${p===currentPhase?'active':''}" onclick="switchPhase('${p}')">${p}</button>`
   ).join('');
-
   const cont=document.getElementById('timelineContent');
-  const phaseItems=tasks.filter(t=>t.phase===currentPhase);
-
+  const addBtn=`<button class="add-chapter-btn" onclick="openChapterDialog()">＋ ADD CHAPTER</button>`;
+  const phaseItems=tasks.filter(t=>t.phase===currentPhase).sort((a,b)=>a.start.localeCompare(b.start));
   if(phaseItems.length===0){
-    cont.innerHTML=`
+    cont.innerHTML=addBtn+`
       <div style="text-align:center;padding:40px 20px;color:var(--muted);">
         <div style="font-size:3rem;margin-bottom:12px;">📅</div>
-        <div style="font-size:.9rem;font-weight:800;">No missions in this phase</div>
+        <div style="font-size:.9rem;font-weight:800;">No chapters yet</div>
+        <div style="font-size:.7rem;margin-top:6px;">Tap “Add Chapter” to enter a chapter and its duration.</div>
       </div>`;
     return;
   }
-
-  cont.innerHTML=phaseItems.map((t,i)=>{
+  cont.innerHTML=addBtn+phaseItems.map(t=>{
     const idx=tasks.indexOf(t);
     const col=getSubCol(t.sub);
     const icon=getSubIcon(t.sub);
@@ -2331,6 +2349,10 @@ function renderTimeline(){
         <div class="mission-date">📅 ${fmtDate(t.start)} – ${fmtDate(t.end)}</div>
         <span class="mission-pill" style="background:${col}22;color:${col};border:1px solid ${col}40">${t.dur} WINDOW</span>
       </div>
+      <div class="chap-acts">
+        <button class="chap-act" onclick="openChapterDialog('${t.id}')" title="Edit">✎</button>
+        <button class="chap-act del" onclick="deleteChapter('${t.id}')" title="Delete">✕</button>
+      </div>
       <input type="checkbox" class="chk" ${t.done?'checked':''} onchange="toggleMission(${idx},this.checked)">
     </div>`;
   }).join('');
@@ -2338,7 +2360,7 @@ function renderTimeline(){
 
 function toggleMission(idx,done){
   tasks[idx].done=done;
-  localStorage.setItem('hs_tasks_v38',JSON.stringify(tasks));
+  saveTasks();
   if(typeof _activityLogToday==='function') _activityLogToday();
   updateActiveMissions();
 }
@@ -2350,72 +2372,40 @@ function fmtDate(d){return parseLocalDate(d).toLocaleDateString('en-GB',{day:'2-
 // ═══════════════════════════════════════
 // NOTES CHAPTERS
 // ═══════════════════════════════════════
-const CHAPTERS={
-  phy:[
-    {num:1,title:'Electric Charges & Fields',preview:'Coulomb\'s law, electric field and Gauss\'s theorem',type:'Advanced'},
-    {num:2,title:'Electrostatic Potential & Capacitance',preview:'Electric potential, capacitors and dielectrics',type:'Advanced'},
-    {num:3,title:'Current Electricity',preview:'Ohm\'s law, Kirchhoff\'s rules and circuits',type:'Intermediate'},
-    {num:4,title:'Moving Charges & Magnetism',preview:'Magnetic force, Biot-Savart and Ampere\'s law',type:'Advanced'},
-    {num:5,title:'Magnetism & Matter',preview:'Bar magnet, Earth\'s magnetism and magnetic materials',type:'Intermediate'},
-    {num:6,title:'Electromagnetic Induction',preview:'Faraday\'s law, Lenz\'s law and induced EMF',type:'Advanced'},
-    {num:7,title:'Alternating Current',preview:'AC circuits, resonance and transformers',type:'Advanced'},
-    {num:8,title:'Electromagnetic Waves',preview:'EM spectrum, Maxwell\'s equations and properties',type:'Intermediate'},
-    {num:9,title:'Ray Optics',preview:'Reflection, refraction, lenses and optical instruments',type:'Advanced'},
-    {num:10,title:'Wave Optics',preview:'Interference, diffraction and polarisation',type:'Advanced'},
-    {num:11,title:'Dual Nature of Radiation & Matter',preview:'Photoelectric effect, de Broglie wavelength',type:'Intermediate'},
-    {num:12,title:'Atoms',preview:'Rutherford & Bohr model, hydrogen spectrum',type:'Intermediate'},
-    {num:13,title:'Nuclei',preview:'Nuclear binding energy, radioactivity and fission',type:'Intermediate'},
-    {num:14,title:'Semiconductor Electronics',preview:'p-n junction, diodes, transistors and logic gates',type:'Advanced'},
-  ],
-  chem:[
-    {num:1,title:'Solutions',preview:'Types of solutions, Raoult\'s law and colligative properties',type:'Advanced'},
-    {num:2,title:'Electrochemistry',preview:'Electrochemical cells, Nernst equation and electrolysis',type:'Advanced'},
-    {num:3,title:'Chemical Kinetics',preview:'Rate of reaction, order and Arrhenius equation',type:'Advanced'},
-    {num:4,title:'d & f-Block Elements',preview:'Transition metals, lanthanides and actinides',type:'Intermediate'},
-    {num:5,title:'Coordination Compounds',preview:'Ligands, CFSE and isomerism in complexes',type:'Advanced'},
-    {num:6,title:'Haloalkanes & Haloarenes',preview:'Nucleophilic substitution and elimination reactions',type:'Intermediate'},
-    {num:7,title:'Alcohols, Phenols & Ethers',preview:'Preparation, properties and reactions',type:'Intermediate'},
-    {num:8,title:'Aldehydes, Ketones & Carboxylic Acids',preview:'Carbonyl chemistry and nucleophilic addition',type:'Advanced'},
-    {num:9,title:'Amines',preview:'Classification, preparation and diazonium salts',type:'Intermediate'},
-    {num:10,title:'Biomolecules',preview:'Carbohydrates, proteins, lipids and nucleic acids',type:'Intermediate'},
-  ],
-  bio:[
-    {num:1,title:'Sexual Reproduction in Flowering Plants',preview:'Pollination, fertilisation and seed development',type:'Intermediate'},
-    {num:2,title:'Human Reproduction',preview:'Male & female reproductive systems and gametogenesis',type:'Intermediate'},
-    {num:3,title:'Reproductive Health',preview:'Contraception, STDs and assisted reproduction',type:'Foundation'},
-    {num:4,title:'Principles of Inheritance & Variation',preview:'Mendel\'s laws, linkage and chromosomal disorders',type:'Advanced'},
-    {num:5,title:'Molecular Basis of Inheritance',preview:'DNA structure, replication, transcription and translation',type:'Advanced'},
-    {num:6,title:'Evolution',preview:'Origin of life, Darwinism and Hardy-Weinberg principle',type:'Intermediate'},
-    {num:7,title:'Human Health & Disease',preview:'Immunity, pathogens, cancer and drugs',type:'Advanced'},
-    {num:8,title:'Microbes in Human Welfare',preview:'Biogas, antibiotics and sewage treatment',type:'Intermediate'},
-    {num:9,title:'Biotechnology: Principles & Processes',preview:'Recombinant DNA, PCR and gel electrophoresis',type:'Advanced'},
-    {num:10,title:'Biotechnology & Its Applications',preview:'GM organisms, insulin and gene therapy',type:'Advanced'},
-    {num:11,title:'Organisms & Populations',preview:'Ecological adaptations, population growth and interactions',type:'Intermediate'},
-    {num:12,title:'Ecosystem',preview:'Energy flow, food chains and nutrient cycling',type:'Intermediate'},
-    {num:13,title:'Biodiversity & Conservation',preview:'Biodiversity types, threats and conservation strategies',type:'Intermediate'},
-  ]
-};
-
+let activeChapterTitle='';
+let _chapterQuery='';
+const SUBMAP={phy:'Physics',chem:'Chemistry',bio:'Biology'};
+const SUBKEY={Physics:'phy',Chemistry:'chem',Biology:'bio'};
+function decodeHtml(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value;}
+function getChapters(sub){
+  return tasks.filter(t=>t.sub===SUBMAP[sub]).slice().sort((a,b)=>a.start.localeCompare(b.start))
+    .map((t,i)=>({num:i+1,id:t.id,title:t.topic,preview:`${fmtDate(t.start)} – ${fmtDate(t.end)}`,type:`${t.dur} · ${t.phase}`}));
+}
 function renderChapters(){
   const list=document.getElementById('chaptersList');
-  const chapters=CHAPTERS[currentSubject]||[];
-  const colors={phy:'#38bdf8',chem:'#2dd4bf',bio:'#818cf8'};
-  
-  list.innerHTML=chapters.map(c=>`
-    <div class="chapter-card ${currentSubject}-card" onclick="openChapter('${currentSubject}',${c.num})">
+  if(!list)return;
+  const q=_chapterQuery.toLowerCase();
+  const all=getChapters(currentSubject);
+  const items=q?all.filter(c=>decodeHtml(c.title).toLowerCase().includes(q)):all;
+  if(!items.length){
+    list.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--muted);">
+      <div style="font-size:3rem;margin-bottom:12px;">📚</div>
+      <div style="font-size:.9rem;font-weight:800;">${q?'No matching chapters':'No chapters added yet'}</div>
+      ${q?'':'<div style="font-size:.7rem;margin-top:6px;">Add your first chapter to start taking notes.</div>'}
+    </div>`;
+    return;
+  }
+  list.innerHTML=items.map(c=>`
+    <div class="chapter-card ${currentSubject}-card" onclick="openChapter('${currentSubject}','${c.id}')">
       <div class="chapter-num">${c.num}</div>
       <div class="chapter-body">
         <div class="chapter-title">${c.title}</div>
-        <div class="chapter-preview">${c.preview}</div>
-        <div class="chapter-meta">
-          <span class="chapter-badge">${c.type}</span>
-        </div>
+        <div class="chapter-preview">📅 ${c.preview}</div>
+        <div class="chapter-meta"><span class="chapter-badge">${c.type}</span></div>
       </div>
       <div style="font-size:1.2rem;color:var(--muted);">→</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
 function filterSubject(sub,e){
   currentSubject=sub;
   document.querySelectorAll('.sub-tab').forEach(t=>t.className='sub-tab');
@@ -2423,38 +2413,98 @@ function filterSubject(sub,e){
   if(btn)btn.classList.add(`active-${sub}`);
   renderChapters();
 }
+function searchChapters(q){_chapterQuery=q||'';renderChapters();}
 
-function searchChapters(q){
-  if(!q){renderChapters();return;}
-  const all=CHAPTERS[currentSubject]||[];
-  const filtered=all.filter(c=>c.title.toLowerCase().includes(q.toLowerCase())||c.preview.toLowerCase().includes(q.toLowerCase()));
-  const list=document.getElementById('chaptersList');
-  const colors={phy:'#38bdf8',chem:'#2dd4bf',bio:'#818cf8'};
-  
-  list.innerHTML=filtered.map(c=>`
-    <div class="chapter-card ${currentSubject}-card" onclick="openChapter('${currentSubject}',${c.num})">
-      <div class="chapter-num">${c.num}</div>
-      <div class="chapter-body">
-        <div class="chapter-title">${c.title}</div>
-        <div class="chapter-preview">${c.preview}</div>
-        <div class="chapter-meta">
-          <span class="chapter-badge">${c.type}</span>
-        </div>
-      </div>
-      <div style="font-size:1.2rem;color:var(--muted);">→</div>
-    </div>
-  `).join('');
+// ═══════════════════════════════════════
+// ADD / EDIT / DELETE CHAPTERS
+// ═══════════════════════════════════════
+let _editChapterId=null;
+function toISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function calcEnd(startStr,days){const d=parseLocalDate(startStr);d.setDate(d.getDate()+days-1);return toISO(d);}
+function chDays(){
+  const n=parseInt(document.getElementById('chDur').value)||0;
+  return n*(document.getElementById('chUnit').value==='w'?7:1);
+}
+function defaultStart(sub){
+  const ends=tasks.filter(t=>t.sub===sub).map(t=>t.end).sort();
+  if(!ends.length)return toISO(new Date());
+  const d=parseLocalDate(ends[ends.length-1]);d.setDate(d.getDate()+1);return toISO(d);
+}
+function updateChapterEnd(){
+  const s=document.getElementById('chStart').value,d=chDays();
+  document.getElementById('chEndPreview').textContent=(s&&d>0)?`Ends ${fmtDate(calcEnd(s,d))} · ${d} day${d>1?'s':''}`:'—';
+}
+function onChapterSubjectChange(){
+  if(!_editChapterId){document.getElementById('chStart').value=defaultStart(document.getElementById('chSub').value);updateChapterEnd();}
+}
+function openChapterDialog(id){
+  _editChapterId=id||null;
+  const t=id?tasks.find(x=>x.id===id):null;
+  document.getElementById('chDialogTitle').textContent=t?'✏️ EDIT CHAPTER':'➕ ADD CHAPTER';
+  const sub=t?t.sub:SUBMAP[currentSubject];
+  document.getElementById('chSub').value=sub;
+  document.getElementById('chName').value=t?decodeHtml(t.topic):'';
+  document.getElementById('chPhase').value=t?t.phase:currentPhase;
+  document.getElementById('chStart').value=t?t.start:defaultStart(sub);
+  const days=t?Math.round((parseLocalDate(t.end)-parseLocalDate(t.start))/86400000)+1:7;
+  if(days%7===0){document.getElementById('chDur').value=days/7;document.getElementById('chUnit').value='w';}
+  else{document.getElementById('chDur').value=days;document.getElementById('chUnit').value='d';}
+  updateChapterEnd();
+  document.getElementById('chapterOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('chName').focus(),100);
+}
+function closeChapterDialog(){document.getElementById('chapterOverlay').classList.remove('show');}
+function saveChapter(){
+  const name=document.getElementById('chName').value.trim();
+  const days=chDays();
+  const start=document.getElementById('chStart').value;
+  if(!name){alert('Please enter a chapter name');return;}
+  if(!start){alert('Please choose a start date');return;}
+  if(days<1){alert('Duration must be at least 1 day');return;}
+  const safe=name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const data={sub:document.getElementById('chSub').value,topic:safe,phase:document.getElementById('chPhase').value,
+    start,end:calcEnd(start,days),dur:days+'D'};
+  if(_editChapterId){
+    const t=tasks.find(x=>x.id===_editChapterId);
+    if(t)Object.assign(t,data);
+  }else{
+    tasks.push({id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),done:false,...data});
+  }
+  currentPhase=data.phase;
+  currentSubject=SUBKEY[data.sub];
+  refreshChapterViews();
+  closeChapterDialog();
+}
+function deleteChapter(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t||!confirm('Delete this chapter and its notes?'))return;
+  localStorage.removeItem(`note_${SUBKEY[t.sub]}_${id}`);
+  tasks=tasks.filter(x=>x.id!==id);
+  refreshChapterViews();
+}
+function refreshChapterViews(){
+  saveTasks();
+  renderTimeline();
+  // sync notes subject tabs
+  document.querySelectorAll('.sub-tab').forEach((b,i)=>{
+    b.className='sub-tab';
+    if(['phy','chem','bio'][i]===currentSubject)b.classList.add('active-'+currentSubject);
+  });
+  renderChapters();
+  updateActiveMissions();
+  renderProgress();
+  if(typeof _activityLogToday==='function')_activityLogToday();
 }
 
 // ═══════════════════════════════════════
 // EDITOR
 // ═══════════════════════════════════════
-function openChapter(sub,num){
-  activeKey=`note_${sub}_${num}`;
-  const chapter=CHAPTERS[sub].find(c=>c.num===num);
+function openChapter(sub,id){
+  const chapter=getChapters(sub).find(c=>c.id===id);
   if(!chapter)return;
-  
-  document.getElementById('editorChapterTitle').textContent=`${sub.toUpperCase()} Ch.${num}: ${chapter.title}`;
+  activeKey=`note_${sub}_${id}`;
+  activeChapterTitle=decodeHtml(chapter.title);
+  document.getElementById('editorChapterTitle').textContent=`${sub.toUpperCase()} Ch.${chapter.num}: ${activeChapterTitle}`;
   const colors={phy:'#38bdf8',chem:'#2dd4bf',bio:'#818cf8'};
   document.getElementById('editorColorDot').style.background=colors[sub];
   
@@ -3450,14 +3500,14 @@ function clearHighlights(){document.getElementById('editorContent').querySelecto
 // ═══════════════════════════════════════
 function exportNote(){
   if(!activeKey)return;
-  const title=activeKey.split('_').slice(1).join('_');
+  const title=escHtml(activeChapterTitle||'note');
   const html=document.getElementById('editorContent').innerHTML;
   const blob=new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;padding:0 20px;line-height:1.8;color:#1a1a1a;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:8px;}blockquote{border-left:3px solid #888;padding-left:14px;color:#555;}</style></head><body><h1>${title}</h1>${html}</body></html>`],{type:'text/html'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=title.replace(/\s+/g,'_')+'.html';a.click();
 }
 function printNote(){
   if(!activeKey)return;
-  const title=activeKey.split('_').slice(1).join('_');
+  const title=escHtml(activeChapterTitle||'note');
   const html=document.getElementById('editorContent').innerHTML;
   const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;padding:0 20px;line-height:1.8;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:8px;}</style></head><body><h1>${title}</h1>${html}</body></html>`);
@@ -3471,6 +3521,7 @@ function exportAllData(){
   const data={
     profile:JSON.parse(localStorage.getItem('profile')||'{}'),
     timeline:JSON.parse(localStorage.getItem('timeline')||'{}'),
+    tasks:tasks,
     notes:{}
   };
   
@@ -3498,6 +3549,7 @@ function handleImport(e){
       const data=JSON.parse(reader.result);
       if(data.profile)localStorage.setItem('profile',JSON.stringify(data.profile));
       if(data.timeline)localStorage.setItem('timeline',JSON.stringify(data.timeline));
+      if(data.tasks)localStorage.setItem(TASKS_KEY,JSON.stringify(data.tasks));
       if(data.notes){
         Object.keys(data.notes).forEach(k=>localStorage.setItem(k,data.notes[k]));
       }
@@ -3709,6 +3761,8 @@ function globalClick(e){
     const el=document.getElementById(id);
     if(el.classList.contains('show')&&e.target===el)el.classList.remove('show');
   });
+  const chOv=document.getElementById('chapterOverlay');
+  if(chOv.classList.contains('show')&&e.target===chOv)closeChapterDialog();
   const editOv = document.getElementById('editOverlay');
   if(editOv.classList.contains('show') && e.target === editOv) closeEdit();
 }
