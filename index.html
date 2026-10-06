@@ -30,7 +30,6 @@ html,body{height:100%;overflow:hidden;}
 body{
   font-family:'Quicksand',sans-serif;background:var(--bg);color:var(--text);
   display:flex;flex-direction:column;height:100dvh;font-weight:700;
-  padding-left:calc(58px + env(safe-area-inset-left,0px));
   transition:background .3s,color .3s;position:relative;
 }
 
@@ -77,11 +76,61 @@ body{
 }
 
 /* BG FX */
-.bg-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;}
-.bg-glow::before{content:'';position:absolute;top:-20%;left:-20%;width:60%;height:60%;
-  background:radial-gradient(circle,rgba(56,189,248,.06) 0%,transparent 70%);filter:blur(40px);}
-.bg-glow::after{content:'';position:absolute;bottom:-20%;right:-20%;width:60%;height:60%;
-  background:radial-gradient(circle,rgba(129,140,248,.06) 0%,transparent 70%);filter:blur(40px);}
+.bg-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
+/* drifting aurora blobs (GPU transform only) */
+.bg-glow::before{
+  content:'';position:absolute;inset:-25%;
+  background:
+    radial-gradient(38% 34% at 18% 16%,rgba(56,189,248,.20),transparent 70%),
+    radial-gradient(34% 32% at 85% 22%,rgba(129,140,248,.20),transparent 70%),
+    radial-gradient(40% 36% at 72% 88%,rgba(45,212,191,.14),transparent 70%),
+    radial-gradient(30% 28% at 12% 85%,rgba(251,191,36,.10),transparent 70%);
+  filter:blur(30px);will-change:transform;
+  animation:auroraDrift 22s ease-in-out infinite alternate;
+}
+/* fine dot grid + soft vignette */
+.bg-glow::after{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.5px) 0 0/26px 26px,
+    radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.45) 100%);
+  -webkit-mask-image:radial-gradient(90% 80% at 50% 45%,#000 30%,transparent 100%);
+          mask-image:radial-gradient(90% 80% at 50% 45%,#000 30%,transparent 100%);
+}
+[data-theme="sun"] .bg-glow::before{
+  background:
+    radial-gradient(38% 34% at 18% 16%,rgba(56,189,248,.28),transparent 70%),
+    radial-gradient(34% 32% at 85% 22%,rgba(129,140,248,.24),transparent 70%),
+    radial-gradient(40% 36% at 72% 88%,rgba(45,212,191,.20),transparent 70%),
+    radial-gradient(30% 28% at 12% 85%,rgba(251,191,36,.18),transparent 70%);
+}
+[data-theme="sun"] .bg-glow::after{
+  background:
+    radial-gradient(rgba(30,64,120,.10) 1px,transparent 1.5px) 0 0/26px 26px,
+    radial-gradient(120% 90% at 50% 40%,transparent 60%,rgba(120,150,200,.18) 100%);
+}
+@keyframes auroraDrift{
+  0%  {transform:translate3d(-3%,-2%,0) rotate(0deg) scale(1);}
+  50% {transform:translate3d(4%,3%,0) rotate(6deg) scale(1.08);}
+  100%{transform:translate3d(-2%,5%,0) rotate(-5deg) scale(1.04);}
+}
+
+/* TOUCH EFFECT */
+.tap-fx{position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:100000;}
+.tap-fx i{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%) scale(0);will-change:transform,opacity;}
+.tap-fx .r1{width:90px;height:90px;border:2px solid var(--accent);box-shadow:0 0 18px rgba(251,191,36,.55),inset 0 0 14px rgba(251,191,36,.25);animation:tapRing .6s cubic-bezier(.2,.7,.3,1) forwards;}
+.tap-fx .r2{width:60px;height:60px;background:radial-gradient(circle,rgba(251,191,36,.45),rgba(56,189,248,.18) 55%,transparent 72%);animation:tapCore .5s ease-out forwards;}
+.tap-fx .sp{width:5px;height:5px;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:tapSpark .55s ease-out forwards;}
+@keyframes tapRing{0%{transform:translate(-50%,-50%) scale(.15);opacity:.95;}100%{transform:translate(-50%,-50%) scale(1.35);opacity:0;}}
+@keyframes tapCore{0%{transform:translate(-50%,-50%) scale(.2);opacity:1;}100%{transform:translate(-50%,-50%) scale(1.2);opacity:0;}}
+@keyframes tapSpark{0%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.2);opacity:0;}}
+/* press feedback on cards */
+.mission-card,.countdown-hero{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;-webkit-user-select:none;user-select:none;}
+.mission-card:active,.countdown-hero:active{transform:scale(.975);box-shadow:0 0 18px rgba(251,191,36,.18);}
+@media(prefers-reduced-motion:reduce){
+  .bg-glow::before{animation:none;}
+  .tap-fx{display:none;}
+}
 
 /* TOPBAR */
 .topbar{
@@ -106,51 +155,42 @@ body{
 .icon-btn:active{transform:scale(.92);}
 .avatar-btn{width:36px;height:36px;border-radius:50%;border:2px solid var(--accent);object-fit:cover;cursor:pointer;}
 
-/* LEFT DOCK */
-:root{--dock-w:58px;}
+/* BOTTOM DOCK - iOS style floating capsule */
 .bottom-nav{
-  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;
-  background:linear-gradient(180deg,rgba(12,18,35,.82),rgba(17,24,39,.72));
-  -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);
-  position:fixed;top:0;bottom:0;left:0;width:calc(var(--dock-w) + env(safe-area-inset-left,0px));z-index:200;
-  padding:8px 0 8px env(safe-area-inset-left,0px);
-  box-shadow:4px 0 24px rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;gap:2px;
+  position:fixed;left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 24px);
+  bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:200;
+  padding:5px;border-radius:999px;overflow:hidden;isolation:isolate;
+  background:rgba(34,36,44,.62);
+  -webkit-backdrop-filter:blur(28px) saturate(190%);backdrop-filter:blur(28px) saturate(190%);
+  border:.5px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 32px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.14) inset;
   animation:dockIn .5s cubic-bezier(.22,1,.36,1) both;
 }
-[data-theme="sun"] .bottom-nav{background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(240,246,255,.8));box-shadow:4px 0 20px rgba(100,130,180,.18);}
-/* animated glowing edge */
-.bottom-nav::after{
-  content:'';position:absolute;top:0;bottom:0;right:0;width:2px;
-  background:linear-gradient(180deg,transparent,var(--phy),var(--bio),var(--accent),transparent);
-  background-size:100% 300%;opacity:.7;animation:dockEdge 6s linear infinite;
+[data-theme="sun"] .bottom-nav{
+  background:rgba(255,255,255,.72);
+  border-color:rgba(255,255,255,.9);
+  box-shadow:0 10px 28px rgba(90,120,170,.28),0 1px 0 #fff inset;
 }
 .nav-item{
-  position:relative;flex:0 0 auto;width:46px;padding:9px 0 7px;border-radius:14px;
-  color:var(--muted);font-size:.46rem;letter-spacing:.2px;font-weight:800;
-  background:none;border:1px solid transparent;cursor:pointer;
-  transition:background .25s,color .25s,transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,border-color .25s;
+  position:relative;flex:0 0 auto;width:64px;padding:7px 0 6px;border-radius:999px;
+  color:var(--muted);font-size:.5rem;letter-spacing:.3px;font-weight:800;
+  background:transparent;border:0;cursor:pointer;
+  transition:background .3s,color .3s,transform .2s;
   font-family:'Quicksand',sans-serif;
   display:flex;flex-direction:column;align-items:center;gap:3px;
+  -webkit-tap-highlight-color:transparent;
 }
-.nav-item .nav-icon{font-size:1.15rem;line-height:1;transition:transform .3s cubic-bezier(.34,1.56,.64,1),filter .3s;}
-.nav-item:hover{background:rgba(255,255,255,.06);color:var(--text);transform:translateX(3px);}
-.nav-item:hover .nav-icon{transform:scale(1.2) rotate(-6deg);}
-.nav-item:active{transform:scale(.9);}
-.nav-item.active{
-  color:var(--accent);
-  background:radial-gradient(circle at 30% 20%,rgba(251,191,36,.22),rgba(251,191,36,.05));
-  border-color:rgba(251,191,36,.35);
-  box-shadow:0 0 14px rgba(251,191,36,.28),inset 0 0 10px rgba(251,191,36,.08);
-}
-.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(251,191,36,.7));animation:dockPulse 2.4s ease-in-out infinite;}
-.nav-item.active .nav-bar{display:block;}
-.nav-bar{display:none;position:absolute;left:-7px;top:22%;bottom:22%;width:3px;height:auto;background:var(--accent);border-radius:0 3px 3px 0;margin:0;box-shadow:0 0 10px var(--accent);}
-@keyframes dockIn{from{transform:translateX(-100%);opacity:0;}to{transform:none;opacity:1;}}
-@keyframes dockEdge{from{background-position:0 0;}to{background-position:0 300%;}}
-@keyframes dockPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
-@media(prefers-reduced-motion:reduce){
-  .bottom-nav,.bottom-nav::after,.nav-item.active .nav-icon{animation:none;}
-}
+.nav-item .nav-icon{font-size:1.15rem;line-height:1;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.nav-item:hover{color:var(--text);}
+.nav-item:active{transform:scale(.92);}
+.nav-item:active .nav-icon{transform:scale(.9);}
+.nav-item.active{color:var(--accent);background:rgba(255,255,255,.14);}
+[data-theme="sun"] .nav-item.active{background:rgba(0,0,0,.07);}
+.nav-item.active .nav-icon{transform:scale(1.08);}
+.nav-bar{display:none!important;}
+@keyframes dockIn{from{transform:translateY(140%);opacity:0;}to{transform:none;opacity:1;}}
+@media(prefers-reduced-motion:reduce){.bottom-nav{animation:none;}}
 
 /* PAGE SYSTEM */
 .pages-wrap{flex:1;overflow:hidden;position:relative;z-index:1;}
@@ -160,7 +200,7 @@ body{
   transition:opacity .25s,transform .25s;transform:translateY(8px);
 }
 .page.active{opacity:1;pointer-events:all;transform:translateY(0);}
-.scroll-area{flex:1;overflow-y:auto;padding:16px 16px 24px;-webkit-overflow-scrolling:touch;}
+.scroll-area{flex:1;overflow-y:auto;padding:16px 16px 96px;-webkit-overflow-scrolling:touch;}
 
 /* ───── DASHBOARD ───── */
 .countdown-hero{
@@ -287,7 +327,7 @@ body{
 .sub-tab.active-chem{background:var(--chem);color:#000;border-color:var(--chem);}
 .sub-tab.active-bio{background:var(--bio);color:#fff;border-color:var(--bio);}
 
-.chapters-list{padding:14px 16px 24px;}
+.chapters-list{padding:14px 16px 96px;}
 .chapter-card{
   display:flex;align-items:center;gap:14px;
   background:var(--surface);border:1px solid var(--border);border-radius:16px;
@@ -869,7 +909,7 @@ body.page-editor .fab-task {
    FLOATING TASK BUTTON + PANEL
    ═══════════════════════════════════════ */
 .fab-task{
-  position:fixed;bottom:20px;right:18px;z-index:500;
+  position:fixed;bottom:84px;right:18px;z-index:500;
   width:54px;height:54px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#f59e0b);
   border:none;cursor:pointer;
@@ -1130,10 +1170,11 @@ select.edit-input{appearance:auto;}
   <!-- DASHBOARD PAGE -->
   <div id="page-dashboard" class="page active">
     <div class="scroll-area">
-      <div class="countdown-hero">
+      <div class="countdown-hero" onclick="openEditProfile()" style="cursor:pointer;" title="Tap to change exam date">
         <div class="countdown-label" id="examLabel">NEET UG 2027</div>
         <div class="countdown-val" id="daysLeft">LOADING...</div>
-        <div class="countdown-label" style="margin-top:8px;">DAYS REMAINING</div>
+        <div class="countdown-label" id="daysLabel" style="margin-top:8px;">DAYS REMAINING</div>
+        <div class="countdown-label" id="examDateLine" style="margin-top:6px;font-size:.5rem;opacity:.75;letter-spacing:1.5px;"></div>
       </div>
 
       <div class="section-title">🎯 ACTIVE MISSIONS</div>
@@ -1581,6 +1622,12 @@ select.edit-input{appearance:auto;}
       <input type="text" class="edit-input" id="editExamInput" placeholder="e.g., NEET UG 2027">
     </div>
 
+    <div class="edit-field">
+      <div class="edit-label">EXAM DATE (FOR DAYS REMAINING)</div>
+      <input type="date" class="edit-input" id="editExamDate">
+      <div style="font-size:.6rem;color:var(--muted);margin-top:6px;font-weight:700;">Leave empty to use the default (10 Feb 2027).</div>
+    </div>
+
     <div class="edit-actions">
       <button class="edit-btn" onclick="closeEdit()">Cancel</button>
       <button class="edit-btn primary" onclick="saveProfile()">Save Changes</button>
@@ -1656,6 +1703,11 @@ select.edit-input{appearance:auto;}
     <div class="onboarding-field">
       <div class="onboarding-label">TARGET EXAM</div>
       <input type="text" class="onboarding-input" id="onboardingExam" placeholder="e.g., NEET UG 2027" value="NEET UG 2027">
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-label">EXAM DATE</div>
+      <input type="date" class="onboarding-input" id="onboardingExamDate" value="2027-02-10">
     </div>
 
     <button class="onboarding-btn" onclick="completeOnboarding()">🚀 START STUDYING</button>
@@ -1802,13 +1854,28 @@ function updateDashboard() {
   if (topbarDateEl) topbarDateEl.textContent = dateStr.toUpperCase();
   if (todayDateEl) todayDateEl.textContent = dateStr;
   
-  // Update countdown
-  const targetDate = new Date('2027-02-10');
-  const daysRemaining = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+  // Update countdown (custom exam date from profile, default 10 Feb 2027)
+  const _p = JSON.parse(localStorage.getItem('profile')||'{}');
+  const _ds = /^\d{4}-\d{2}-\d{2}$/.test(_p.examDate||'') ? _p.examDate : '2027-02-10';
+  const targetDate = parseLocalDate(_ds);
+  const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const daysRemaining = Math.round((targetDate - todayMid) / 86400000);
   const daysLeftEl = document.getElementById('daysLeft');
+  const daysLabelEl = document.getElementById('daysLabel');
   if (daysLeftEl) {
-    daysLeftEl.textContent = daysRemaining + ' DAYS';
+    if (daysRemaining > 0) {
+      daysLeftEl.textContent = daysRemaining + (daysRemaining === 1 ? ' DAY' : ' DAYS');
+      if (daysLabelEl) daysLabelEl.textContent = 'DAYS REMAINING';
+    } else if (daysRemaining === 0) {
+      daysLeftEl.textContent = 'TODAY!';
+      if (daysLabelEl) daysLabelEl.textContent = 'EXAM DAY - ALL THE BEST';
+    } else {
+      daysLeftEl.textContent = Math.abs(daysRemaining) + (Math.abs(daysRemaining) === 1 ? ' DAY' : ' DAYS');
+      if (daysLabelEl) daysLabelEl.textContent = 'SINCE EXAM DATE';
+    }
   }
+  const dateLineEl = document.getElementById('examDateLine');
+  if (dateLineEl) dateLineEl.textContent = targetDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).toUpperCase() + '  \u00B7  TAP TO CHANGE';
   
   // Update active missions
   updateActiveMissions();
@@ -2205,6 +2272,7 @@ function openEditProfile(){
   const profile=JSON.parse(localStorage.getItem('profile')||'{}');
   document.getElementById('editNameInput').value=profile.name||'';
   document.getElementById('editExamInput').value=profile.exam||'NEET UG 2027';
+  document.getElementById('editExamDate').value=profile.examDate||'';
   const defaultSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%236b7fa3'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%23fff' font-family='Arial'%3E👤%3C/text%3E%3C/svg%3E";
   document.getElementById('editAvatarPreview').src=profile.avatar||defaultSrc;
   document.getElementById('editOverlay').classList.add('show');
@@ -2233,12 +2301,14 @@ function saveProfile(){
   const profile={
     name:document.getElementById('editNameInput').value||'Student',
     exam:document.getElementById('editExamInput').value||'NEET UG 2027',
+    examDate:document.getElementById('editExamDate').value||'',
     avatar:avatarToSave
   };
   _editAvatarDataUrl=null;
   localStorage.setItem('profile',JSON.stringify(profile));
   document.getElementById('avatarBtn').src=profile.avatar;
   document.getElementById('examLabel').textContent=profile.exam.toUpperCase();
+  updateDashboard();
   closeEdit();
 }
 
@@ -2264,12 +2334,14 @@ function completeOnboarding(){
   const avatar=_onboardingAvatarDataUrl||'';
   _onboardingAvatarDataUrl=null;
   
-  const profile={name,exam,avatar};
+  const examDate=document.getElementById('onboardingExamDate').value||'';
+  const profile={name,exam,examDate,avatar};
   localStorage.setItem('profile',JSON.stringify(profile));
   localStorage.setItem('onboarded','true');
   
   document.getElementById('avatarBtn').src=avatar;
   document.getElementById('onboarding').style.display='none';
+  updateDashboard();
 }
 
 // ═══════════════════════════════════════
@@ -4086,11 +4158,11 @@ window.addEventListener('popstate',function(e){
 </script>
 <!-- Gemini floating AI button -->
 <style>
-#ai-fab{position:fixed;bottom:16px;left:74px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#0d47a1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform .2s;box-shadow:0 4px 16px rgba(26,115,232,0.45)}
+#ai-fab{position:fixed;bottom:84px;left:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#0d47a1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform .2s;box-shadow:0 4px 16px rgba(26,115,232,0.45)}
 #ai-fab:hover{transform:scale(1.1)}
 #ai-fab:active{transform:scale(0.95)}
 #ai-fab svg{width:24px;height:24px}
-#ai-chat{position:fixed;bottom:78px;left:74px;width:300px;background:#0c1223;border:1px solid #1e2d45;border-radius:18px;z-index:9998;display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.45)}
+#ai-chat{position:fixed;bottom:146px;left:16px;width:300px;background:#0c1223;border:1px solid #1e2d45;border-radius:18px;z-index:9998;display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.45)}
 #ai-chat.open{display:flex}
 [data-theme="sun"] #ai-chat{background:#fff;border-color:#e0e0e0;}
 #ai-chat-header{background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:12px 16px;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;letter-spacing:.5px}
@@ -4192,6 +4264,32 @@ async function sendMsg() {
   }
   msgs.scrollTop = msgs.scrollHeight;
 }
+</script>
+
+<script>
+// TOUCH EFFECT: ripple + sparks wherever the screen is touched
+(function(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const layer=document.createElement('div');layer.className='tap-fx';document.body.appendChild(layer);
+  let busy=0;
+  document.addEventListener('pointerdown',function(e){
+    if(busy>6)return;
+    const t=e.target;
+    if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable="true"]'))return;
+    busy++;
+    const box=document.createElement('div');
+    box.style.cssText='position:fixed;left:'+e.clientX+'px;top:'+e.clientY+'px;width:0;height:0;pointer-events:none;';
+    box.innerHTML='<i class="r2"></i><i class="r1"></i>';
+    for(let k=0;k<6;k++){
+      const a=Math.PI*2*k/6+Math.random()*.6,r=30+Math.random()*22;
+      const s=document.createElement('i');s.className='sp';
+      s.style.setProperty('--dx',Math.cos(a)*r+'px');s.style.setProperty('--dy',Math.sin(a)*r+'px');
+      box.appendChild(s);
+    }
+    layer.appendChild(box);
+    setTimeout(function(){box.remove();busy--;},700);
+  },{passive:true,capture:true});
+})();
 </script>
 </body>
 </html>
