@@ -115,22 +115,60 @@ body{
   100%{transform:translate3d(-2%,5%,0) rotate(-5deg) scale(1.04);}
 }
 
-/* TOUCH EFFECT */
-.tap-fx{position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:100000;}
-.tap-fx i{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%) scale(0);will-change:transform,opacity;}
-.tap-fx .r1{width:90px;height:90px;border:2px solid var(--accent);box-shadow:0 0 18px rgba(251,191,36,.55),inset 0 0 14px rgba(251,191,36,.25);animation:tapRing .6s cubic-bezier(.2,.7,.3,1) forwards;}
-.tap-fx .r2{width:60px;height:60px;background:radial-gradient(circle,rgba(251,191,36,.45),rgba(56,189,248,.18) 55%,transparent 72%);animation:tapCore .5s ease-out forwards;}
-.tap-fx .sp{width:5px;height:5px;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:tapSpark .55s ease-out forwards;}
-@keyframes tapRing{0%{transform:translate(-50%,-50%) scale(.15);opacity:.95;}100%{transform:translate(-50%,-50%) scale(1.35);opacity:0;}}
-@keyframes tapCore{0%{transform:translate(-50%,-50%) scale(.2);opacity:1;}100%{transform:translate(-50%,-50%) scale(1.2);opacity:0;}}
-@keyframes tapSpark{0%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.2);opacity:0;}}
-/* press feedback on cards */
-.mission-card,.countdown-hero{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;-webkit-user-select:none;user-select:none;}
-.mission-card:active,.countdown-hero:active{transform:scale(.975);box-shadow:0 0 18px rgba(251,191,36,.18);}
-@media(prefers-reduced-motion:reduce){
-  .bg-glow::before{animation:none;}
-  .tap-fx{display:none;}
-}
+@media(prefers-reduced-motion:reduce){.bg-glow::before{animation:none;}}
+
+
+/* WALLPAPER */
+#wallpaper{position:fixed;inset:0;z-index:-3;pointer-events:none;background-size:cover;background-position:center;background-repeat:no-repeat;display:none;transition:opacity .4s;}
+#wallpaperDim{position:fixed;inset:0;z-index:-2;pointer-events:none;display:none;background:rgba(3,5,8,var(--wp-dim,.35));}
+[data-theme="sun"] #wallpaperDim{background:rgba(240,246,255,var(--wp-dim,.35));}
+body.has-wp #wallpaper,body.has-wp #wallpaperDim{display:block;}
+body.has-wp .bg-glow::before{opacity:.35;}
+body.has-wp .bg-glow::after{opacity:.45;}
+.wp-preview{height:120px;border-radius:14px;border:1px solid var(--border);background:var(--surface2) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.7rem;font-weight:800;letter-spacing:1px;margin-bottom:4px;overflow:hidden;}
+.wp-chips{display:flex;gap:10px;flex-wrap:wrap;}
+.wp-chip{width:44px;height:44px;border-radius:14px;border:2px solid var(--border);cursor:pointer;background-size:cover;background-position:center;transition:transform .2s,border-color .2s;padding:0;position:relative;}
+.wp-chip:active{transform:scale(.92);}
+.wp-chip.active{border-color:var(--accent);}
+.wp-chip.none{background:var(--surface2);color:var(--muted);font-size:.9rem;font-weight:900;font-family:'Quicksand',sans-serif;}
+.wp-slider-row{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:.75rem;font-weight:800;color:var(--text);}
+.wp-slider-row span:first-child{width:38px;}
+.wp-slider-row span:last-child{width:38px;text-align:right;color:var(--muted);}
+.wp-slider-row input[type=range]{flex:1;accent-color:var(--accent);}
+
+/* DASHBOARD EXTRAS */
+.dash-greet{margin:2px 2px 14px;}
+.dash-greet .g1{font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--text);}
+.dash-greet .g2{font-size:.72rem;color:var(--muted);margin-top:4px;font-weight:700;}
+.dash-stats{display:flex;gap:10px;margin:14px 0;}
+.stat-chip{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 6px;text-align:center;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.stat-chip:active{transform:scale(.94);}
+.stat-val{font-family:'Orbitron',sans-serif;font-size:1.05rem;color:var(--accent);}
+.stat-lbl{font-size:.5rem;letter-spacing:1px;color:var(--muted);margin-top:5px;font-weight:800;}
+.focus-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:14px;}
+.focus-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.focus-modes{display:flex;gap:6px;}
+.fx-btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:999px;padding:6px 12px;font-size:.65rem;font-weight:800;cursor:pointer;font-family:'Quicksand',sans-serif;transition:background .2s,border-color .2s,transform .15s;}
+.fx-btn:active{transform:scale(.93);}
+.fx-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(251,191,36,.12);}
+.focus-ring{position:relative;width:170px;height:170px;margin:10px auto 6px;}
+.focus-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.focus-ring .trk{fill:none;stroke:var(--border2);stroke-width:8;}
+.focus-ring .bar{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;stroke-dasharray:339.292;stroke-dashoffset:0;transition:stroke-dashoffset .3s linear,stroke .3s;}
+.focus-ring.brk .bar{stroke:var(--bio,#2dd4bf);}
+.focus-time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.focus-time b{font-family:'Orbitron',sans-serif;font-size:1.9rem;color:var(--text);letter-spacing:1px;}
+.focus-time small{font-size:.55rem;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:800;}
+.focus-controls{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px;}
+.focus-main{min-width:120px;padding:12px 20px;border-radius:999px;border:0;background:var(--accent);color:#1a1200;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;font-family:'Quicksand',sans-serif;transition:transform .15s;}
+.focus-main:active{transform:scale(.95);}
+.focus-msg{text-align:center;font-size:.7rem;color:var(--muted);margin-top:10px;min-height:1em;font-weight:800;}
+.focus-card.done{animation:focusDone .9s ease;}
+@keyframes focusDone{0%,100%{transform:scale(1);}30%{transform:scale(1.025);}60%{transform:scale(.99);}}
+.quote-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:16px;padding:14px 16px;margin-bottom:18px;cursor:pointer;}
+.quote-card .q{font-size:.8rem;line-height:1.5;color:var(--text);font-weight:700;}
+.quote-card .h{font-size:.55rem;letter-spacing:1.5px;color:var(--muted);margin-top:8px;font-weight:800;}
+@media(prefers-reduced-motion:reduce){.focus-card.done{animation:none;}}
 
 /* TOPBAR */
 .topbar{
@@ -1151,6 +1189,7 @@ select.edit-input{appearance:auto;}
 <!-- Nature Animation Container -->
 <div class="nature-container" id="natureContainer"></div>
 
+<div id="wallpaper"></div><div id="wallpaperDim"></div>
 <div class="bg-glow"></div>
 
 <!-- TOPBAR -->
@@ -1170,11 +1209,45 @@ select.edit-input{appearance:auto;}
   <!-- DASHBOARD PAGE -->
   <div id="page-dashboard" class="page active">
     <div class="scroll-area">
+      <div class="dash-greet"><div class="g1" id="greetText">HELLO</div><div class="g2" id="greetSub"></div></div>
       <div class="countdown-hero" onclick="openEditProfile()" style="cursor:pointer;" title="Tap to change exam date">
         <div class="countdown-label" id="examLabel">NEET UG 2027</div>
         <div class="countdown-val" id="daysLeft">LOADING...</div>
         <div class="countdown-label" id="daysLabel" style="margin-top:8px;">DAYS REMAINING</div>
         <div class="countdown-label" id="examDateLine" style="margin-top:6px;font-size:.5rem;opacity:.75;letter-spacing:1.5px;"></div>
+      </div>
+
+      <div class="dash-stats">
+        <div class="stat-chip" onclick="haptic(8)"><div class="stat-val" id="statFocus">0m</div><div class="stat-lbl">FOCUS TODAY</div></div>
+        <div class="stat-chip" onclick="haptic(8)"><div class="stat-val" id="statStreak">0</div><div class="stat-lbl">DAY STREAK</div></div>
+        <div class="stat-chip" onclick="haptic(8)"><div class="stat-val" id="statSessions">0</div><div class="stat-lbl">SESSIONS</div></div>
+      </div>
+
+      <div class="focus-card" id="focusCard">
+        <div class="focus-head">
+          <div class="section-title" style="margin:0;">⏱️ FOCUS TIMER</div>
+          <div class="focus-modes">
+            <button class="fx-btn" data-mode="focus" onclick="fSetMode('focus')">Focus</button>
+            <button class="fx-btn" data-mode="short" onclick="fSetMode('short')">Short</button>
+            <button class="fx-btn" data-mode="long" onclick="fSetMode('long')">Long</button>
+          </div>
+        </div>
+        <div class="focus-ring" id="focusRing">
+          <svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="bar" id="focusBar" cx="60" cy="60" r="54"/></svg>
+          <div class="focus-time"><b id="focusTime">25:00</b><small id="focusModeLbl">FOCUS</small></div>
+        </div>
+        <div class="focus-controls">
+          <button class="fx-btn" onclick="fAdjust(-5)">−5</button>
+          <button class="focus-main" id="focusMain" onclick="fToggle()">START</button>
+          <button class="fx-btn" onclick="fAdjust(5)">+5</button>
+        </div>
+        <div class="focus-controls" style="margin-top:10px;"><button class="fx-btn" onclick="fReset()">↻ Reset</button></div>
+        <div class="focus-msg" id="focusMsg"></div>
+      </div>
+
+      <div class="quote-card" onclick="nextQuote()">
+        <div class="q" id="quoteText"></div>
+        <div class="h">TAP FOR ANOTHER</div>
       </div>
 
       <div class="section-title">🎯 ACTIVE MISSIONS</div>
@@ -1520,12 +1593,31 @@ select.edit-input{appearance:auto;}
           <div class="settings-label">Auto-save Notes</div>
           <div class="switch on" id="autoSaveSwitch" onclick="toggleAutoSave()"></div>
         </div>
+        <div class="settings-row">
+          <div class="settings-label">Haptic Feedback</div>
+          <div class="switch on" id="hapticSwitch" onclick="toggleHaptics()"></div>
+        </div>
       </div>
 
       <div class="section-title" style="margin-top:24px;">🎨 THEME</div>
       <div class="theme-opts">
         <button class="theme-opt active" onclick="setTheme('dark')">🌙 Dark</button>
         <button class="theme-opt" onclick="setTheme('sun')">☀️ Light</button>
+      </div>
+
+      <div class="section-title" style="margin-top:24px;">🖼️ WALLPAPER</div>
+      <div class="settings-card">
+        <div class="wp-preview" id="wpPreview"><span id="wpPreviewText">NO WALLPAPER</span></div>
+        <div class="export-btns">
+          <button class="export-btn" onclick="document.getElementById('wpFile').click()">📁 Choose Photo</button>
+          <button class="export-btn" onclick="wpRemove()">✕ Remove</button>
+        </div>
+        <input type="file" id="wpFile" accept="image/*" style="display:none;" onchange="wpPick(this)">
+        <div class="settings-label" style="margin:16px 0 8px;">Presets</div>
+        <div class="wp-chips" id="wpChips"></div>
+        <div class="wp-slider-row"><span>Dim</span><input type="range" id="wpDim" min="0" max="85" value="35" oninput="wpSet('dim',this.value/100)"><span id="wpDimVal">35%</span></div>
+        <div class="wp-slider-row"><span>Blur</span><input type="range" id="wpBlur" min="0" max="20" value="0" oninput="wpSet('blur',+this.value)"><span id="wpBlurVal">0</span></div>
+        <div style="font-size:.6rem;color:var(--muted);margin-top:12px;font-weight:700;">Photos are resized and stored only on this device. They are not included in JSON export.</div>
       </div>
 
       <div class="section-title" style="margin-top:24px;">📂 DATA MANAGEMENT</div>
@@ -1842,6 +1934,7 @@ setTimeout(createFallingItem, 800);
 // AUTO UPDATE DATE & COUNTDOWN
 // ═══════════════════════════════════════
 function updateDashboard() {
+  try{ if(typeof renderDashExtras==='function') renderDashExtras(); }catch(e){}
   const now = new Date();
   
   // Update date displays
@@ -3872,7 +3965,7 @@ function globalClick(e){
 // ═══════════════════════════════════════
 // RESET
 // ═══════════════════════════════════════
-function hardReset(){if(confirm('⚠️ WIPE ALL DATA? This cannot be undone!')){localStorage.clear();location.reload();}}
+function hardReset(){if(confirm('⚠️ WIPE ALL DATA? This cannot be undone!')){localStorage.clear();try{indexedDB.deleteDatabase('nt_wallpaper');}catch(e){}location.reload();}}
 
 // ═══════════════════════════════════════
 // ANDROID STATUS BAR + NAV BAR COLOR SYNC
@@ -4266,30 +4359,238 @@ async function sendMsg() {
 }
 </script>
 
+
 <script>
-// TOUCH EFFECT: ripple + sparks wherever the screen is touched
-(function(){
-  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  const layer=document.createElement('div');layer.className='tap-fx';document.body.appendChild(layer);
-  let busy=0;
-  document.addEventListener('pointerdown',function(e){
-    if(busy>6)return;
-    const t=e.target;
-    if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable="true"]'))return;
-    busy++;
-    const box=document.createElement('div');
-    box.style.cssText='position:fixed;left:'+e.clientX+'px;top:'+e.clientY+'px;width:0;height:0;pointer-events:none;';
-    box.innerHTML='<i class="r2"></i><i class="r1"></i>';
-    for(let k=0;k<6;k++){
-      const a=Math.PI*2*k/6+Math.random()*.6,r=30+Math.random()*22;
-      const s=document.createElement('i');s.className='sp';
-      s.style.setProperty('--dx',Math.cos(a)*r+'px');s.style.setProperty('--dy',Math.sin(a)*r+'px');
-      box.appendChild(s);
-    }
-    layer.appendChild(box);
-    setTimeout(function(){box.remove();busy--;},700);
-  },{passive:true,capture:true});
-})();
+// ===== HAPTICS =====
+function haptic(ms){ try{ if(localStorage.getItem('haptics')!=='off' && navigator.vibrate) navigator.vibrate(ms||8); }catch(e){} }
+function toggleHaptics(){
+  const off=localStorage.getItem('haptics')==='off';
+  localStorage.setItem('haptics',off?'on':'off');
+  const sw=document.getElementById('hapticSwitch'); if(sw) sw.classList.toggle('on',off);
+  if(off) haptic(15);
+}
+document.addEventListener('click',function(e){
+  if(e.target.closest && e.target.closest('.nav-item,.switch,.theme-opt,.export-btn,.fx-btn,.wp-chip,.phase-pill')) haptic(8);
+},true);
+
+// ===== WALLPAPER =====
+const WP_PRESETS={
+  sunset:'linear-gradient(160deg,#1e1b4b,#7c2d5b 50%,#f97316)',
+  ocean:'linear-gradient(160deg,#021b3a,#0b5d8a 55%,#2dd4bf)',
+  forest:'linear-gradient(160deg,#04180f,#14532d 55%,#84cc16)',
+  galaxy:'radial-gradient(circle at 20% 20%,#6d28d9,transparent 55%),radial-gradient(circle at 80% 70%,#0ea5e9,transparent 50%),linear-gradient(#070b1a,#070b1a)',
+  rose:'linear-gradient(160deg,#2a0a1c,#9d174d 55%,#fb7185)'
+};
+let _wpUrl=null;
+function wpOpts(){
+  const def={mode:'none',preset:'',dim:.35,blur:0};
+  try{ return Object.assign(def,JSON.parse(localStorage.getItem('wpOpts')||'{}')); }catch(e){ return def; }
+}
+function wpSave(o){ localStorage.setItem('wpOpts',JSON.stringify(o)); }
+function _idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open('nt_wallpaper',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function _idbOp(mode,fn){
+  const db=await _idb();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('kv',mode); const q=fn(tx.objectStore('kv'));
+    tx.oncomplete=()=>{db.close();res(q&&q.result);}; tx.onerror=()=>{db.close();rej(tx.error);}; tx.onabort=()=>{db.close();rej(tx.error);};
+  });
+}
+const idbGet=k=>_idbOp('readonly',s=>s.get(k));
+const idbSet=(k,v)=>_idbOp('readwrite',s=>s.put(v,k));
+const idbDel=k=>_idbOp('readwrite',s=>s.delete(k));
+
+async function applyWallpaper(){
+  const o=wpOpts();
+  const el=document.getElementById('wallpaper'); if(!el) return;
+  let bg='';
+  if(o.mode==='image'){
+    let blob=null; try{ blob=await idbGet('image'); }catch(e){}
+    if(blob){ if(_wpUrl) URL.revokeObjectURL(_wpUrl); _wpUrl=URL.createObjectURL(blob); bg='url("'+_wpUrl+'")'; }
+  }else if(o.mode==='preset' && WP_PRESETS[o.preset]){ bg=WP_PRESETS[o.preset]; }
+  el.style.backgroundImage=bg||'none';
+  el.style.filter=o.blur?('blur('+o.blur+'px)'):'';
+  el.style.transform=o.blur?'scale(1.1)':'';
+  document.documentElement.style.setProperty('--wp-dim',o.dim);
+  document.body.classList.toggle('has-wp',!!bg);
+  // settings UI
+  const pv=document.getElementById('wpPreview');
+  if(pv){ pv.style.backgroundImage=bg||'none'; const t=document.getElementById('wpPreviewText'); if(t) t.style.display=bg?'none':''; }
+  const dm=document.getElementById('wpDim'); if(dm){ dm.value=Math.round(o.dim*100); document.getElementById('wpDimVal').textContent=Math.round(o.dim*100)+'%'; }
+  const bl=document.getElementById('wpBlur'); if(bl){ bl.value=o.blur; document.getElementById('wpBlurVal').textContent=o.blur; }
+  document.querySelectorAll('#wpChips .wp-chip').forEach(c=>{
+    c.classList.toggle('active',(c.dataset.p==='none'&&!bg)||(o.mode==='preset'&&c.dataset.p===o.preset));
+  });
+}
+function wpBuildChips(){
+  const box=document.getElementById('wpChips'); if(!box) return;
+  box.innerHTML='<button class="wp-chip none" data-p="none" title="None" onclick="wpRemove()">\u2715</button>'+
+    Object.keys(WP_PRESETS).map(k=>'<button class="wp-chip" data-p="'+k+'" title="'+k+'" style="background-image:'+WP_PRESETS[k]+'" onclick="wpPreset(\''+k+'\')"></button>').join('');
+}
+function wpPreset(k){ const o=wpOpts(); o.mode='preset'; o.preset=k; wpSave(o); applyWallpaper(); }
+function wpSet(key,val){ const o=wpOpts(); o[key]=val; wpSave(o); applyWallpaper(); }
+async function wpRemove(){
+  const o=wpOpts(); o.mode='none'; o.preset=''; wpSave(o);
+  try{ await idbDel('image'); }catch(e){}
+  applyWallpaper();
+}
+function wpCompress(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{
+      const max=1600; let w=img.naturalWidth,h=img.naturalHeight; const s=Math.min(1,max/Math.max(w,h));
+      w=Math.round(w*s); h=Math.round(h*s);
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
+      c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',.85);
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('img')); };
+    img.src=url;
+  });
+}
+async function wpPick(input){
+  const f=input.files&&input.files[0]; input.value='';
+  if(!f) return;
+  if(!/^image\//.test(f.type)){ alert('Please choose an image file.'); return; }
+  try{
+    const blob=await wpCompress(f);
+    await idbSet('image',blob);
+    const o=wpOpts(); o.mode='image'; wpSave(o);
+    await applyWallpaper();
+  }catch(e){ alert('Could not use that image. Try a JPG or PNG.'); }
+}
+
+// ===== QUOTES / GREETING / STATS =====
+const QUOTES=[
+  'Small progress every day adds up to big results.',
+  'Discipline is choosing what you want most over what you want now.',
+  'One focused hour beats three distracted ones.',
+  'You do not have to be perfect, you just have to show up.',
+  'Revise today, relax on exam day.',
+  'Consistency turns hard chapters into familiar friends.',
+  'Start with the topic you like least, the rest feels easier.',
+  'Rest is part of the plan, not a break from it.',
+  'Every question you solve now is one less surprise later.',
+  'Your future self is watching. Make them proud.',
+  'Progress, not perfection.',
+  'Today is a good day to finish one more chapter.'
+];
+let _qi=-1;
+function _dayKey(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function nextQuote(){ _qi=(_qi+1+Math.floor(Math.random()*(QUOTES.length-1)))%QUOTES.length; document.getElementById('quoteText').textContent=QUOTES[_qi]; haptic(8); }
+function fLog(){ try{ return JSON.parse(localStorage.getItem('focusLog')||'{}'); }catch(e){ return {}; } }
+function renderDashExtras(){
+  const g=document.getElementById('greetText'); if(!g) return;
+  const h=new Date().getHours();
+  const part=h<5?'Late night':h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night';
+  let name=''; try{ name=(JSON.parse(localStorage.getItem('profile')||'{}').name||'').trim(); }catch(e){}
+  g.textContent=(part+(name?', '+name:'')).toUpperCase();
+  document.getElementById('greetSub').textContent='Let\u2019s make today count.';
+  const log=fLog(), t=log[_dayKey()]||{min:0,n:0};
+  document.getElementById('statFocus').textContent=t.min>=60?(Math.floor(t.min/60)+'h '+(t.min%60)+'m'):(t.min+'m');
+  document.getElementById('statSessions').textContent=t.n||0;
+  let streak=0, d=new Date();
+  if(!(log[_dayKey(d)]&&log[_dayKey(d)].min>0)) d.setDate(d.getDate()-1);
+  while(log[_dayKey(d)]&&log[_dayKey(d)].min>0){ streak++; d.setDate(d.getDate()-1); }
+  document.getElementById('statStreak').textContent=streak+(streak?' \uD83D\uDD25':'');
+  if(_qi<0){ const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000); _qi=doy%QUOTES.length; }
+  document.getElementById('quoteText').textContent=QUOTES[_qi];
+}
+
+// ===== FOCUS TIMER =====
+const FOCUS={mode:'focus',dur:1500,left:1500,endAt:0,running:false,tick:null};
+const F_DEF={focus:25,short:5,long:15}, F_LBL={focus:'FOCUS',short:'SHORT BREAK',long:'LONG BREAK'};
+function fDurs(){ try{ return Object.assign({},F_DEF,JSON.parse(localStorage.getItem('focusDurs')||'{}')); }catch(e){ return Object.assign({},F_DEF); } }
+function fSave(){ localStorage.setItem('focusState',JSON.stringify({mode:FOCUS.mode,dur:FOCUS.dur,left:FOCUS.left,endAt:FOCUS.endAt,running:FOCUS.running})); }
+function fFmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function fRender(){
+  const tEl=document.getElementById('focusTime'); if(!tEl) return;
+  tEl.textContent=fFmt(FOCUS.left);
+  document.getElementById('focusModeLbl').textContent=F_LBL[FOCUS.mode];
+  document.getElementById('focusMain').textContent=FOCUS.running?'PAUSE':(FOCUS.left<FOCUS.dur&&FOCUS.left>0?'RESUME':'START');
+  const C=339.292; document.getElementById('focusBar').style.strokeDashoffset=String(C*(1-(FOCUS.left/FOCUS.dur)));
+  document.getElementById('focusRing').classList.toggle('brk',FOCUS.mode!=='focus');
+  document.querySelectorAll('.focus-modes .fx-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===FOCUS.mode));
+  document.title=FOCUS.running?(fFmt(FOCUS.left)+' \u00B7 '+F_LBL[FOCUS.mode]):'NEET Tracker';
+}
+function fTick(){
+  if(FOCUS.running){
+    FOCUS.left=Math.max(0,Math.ceil((FOCUS.endAt-Date.now())/1000));
+    if(FOCUS.left<=0){ fComplete(); return; }
+  }
+  fRender();
+}
+function fStart(){
+  if(FOCUS.running) return;
+  if(FOCUS.left<=0) FOCUS.left=FOCUS.dur;
+  FOCUS.endAt=Date.now()+FOCUS.left*1000; FOCUS.running=true; fSave();
+  clearInterval(FOCUS.tick); FOCUS.tick=setInterval(fTick,250);
+  document.getElementById('focusMsg').textContent=FOCUS.mode==='focus'?'Stay with it. You\u2019ve got this.':'Relax, stretch, drink some water.';
+  fRender();
+}
+function fPause(){
+  FOCUS.left=Math.max(0,Math.round((FOCUS.endAt-Date.now())/1000));
+  FOCUS.running=false; clearInterval(FOCUS.tick); fSave();
+  document.getElementById('focusMsg').textContent='Paused';
+  fRender();
+}
+function fToggle(){ haptic(12); FOCUS.running?fPause():fStart(); }
+function fReset(){ haptic(8); FOCUS.running=false; clearInterval(FOCUS.tick); FOCUS.left=FOCUS.dur; fSave(); document.getElementById('focusMsg').textContent=''; fRender(); }
+function fSetMode(m){
+  FOCUS.running=false; clearInterval(FOCUS.tick);
+  FOCUS.mode=m; FOCUS.dur=FOCUS.left=fDurs()[m]*60; fSave();
+  document.getElementById('focusMsg').textContent=''; fRender();
+}
+function fAdjust(delta){
+  if(FOCUS.running) return;
+  const mins=Math.min(180,Math.max(1,Math.round(FOCUS.dur/60)+delta));
+  const dd=fDurs(); dd[FOCUS.mode]=mins; localStorage.setItem('focusDurs',JSON.stringify(dd));
+  FOCUS.dur=FOCUS.left=mins*60; fSave(); fRender();
+}
+function _beep(){
+  try{
+    const ac=new (window.AudioContext||window.webkitAudioContext)();
+    [0,.22,.44].forEach((t,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sine'; o.frequency.value=i===2?988:784; o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(0,ac.currentTime+t); g.gain.linearRampToValueAtTime(.18,ac.currentTime+t+.02);
+      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.2);
+      o.start(ac.currentTime+t); o.stop(ac.currentTime+t+.22);
+    });
+  }catch(e){}
+}
+function fComplete(){
+  const wasFocus=FOCUS.mode==='focus', mins=Math.round(FOCUS.dur/60);
+  FOCUS.running=false; clearInterval(FOCUS.tick);
+  if(wasFocus){
+    const log=fLog(), k=_dayKey(); const t=log[k]||{min:0,n:0};
+    t.min+=mins; t.n+=1; log[k]=t; localStorage.setItem('focusLog',JSON.stringify(log));
+  }
+  _beep(); haptic([200,100,200]);
+  const next=wasFocus?'short':'focus';
+  FOCUS.mode=next; FOCUS.dur=FOCUS.left=fDurs()[next]*60; fSave();
+  fRender();
+  document.getElementById('focusMsg').textContent=wasFocus?('Session complete! +'+mins+' min. Take a short break.'):'Break over. Ready for the next session?';
+  const c=document.getElementById('focusCard'); if(c){ c.classList.remove('done'); void c.offsetWidth; c.classList.add('done'); }
+  renderDashExtras();
+}
+function fInit(){
+  try{
+    const s=JSON.parse(localStorage.getItem('focusState')||'null');
+    if(s&&F_LBL[s.mode]&&s.dur>0){ FOCUS.mode=s.mode; FOCUS.dur=s.dur; FOCUS.left=Math.min(s.left,s.dur); FOCUS.endAt=s.endAt||0; FOCUS.running=!!s.running; }
+    else{ FOCUS.dur=FOCUS.left=fDurs().focus*60; }
+  }catch(e){}
+  if(FOCUS.running){
+    if(Date.now()>=FOCUS.endAt){ fComplete(); }
+    else{ FOCUS.tick=setInterval(fTick,250); fTick(); }
+  }else fRender();
+}
+
+// ===== INIT =====
+window.addEventListener('load',function(){
+  const hs=document.getElementById('hapticSwitch'); if(hs) hs.classList.toggle('on',localStorage.getItem('haptics')!=='off');
+  wpBuildChips(); applyWallpaper();
+  fInit(); renderDashExtras();
+});
 </script>
 </body>
 </html>
