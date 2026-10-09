@@ -16,7 +16,7 @@
   --bg:#030508;--surface:rgba(12,18,35,0.9);--surface2:#0c1223;--surface3:#111827;
   --border:#1e2d45;--border2:#243347;
   --text:#f0f4ff;--muted:#6b7fa3;--accent:#fbbf24;
-  --phy:#38bdf8;--chem:#2dd4bf;--bio:#818cf8;
+  --phy:#38bdf8;--chem:#2dd4bf;--bio:#818cf8;--eng:#f472b6;--asm:#fb923c;--math:#a3e635;
   --r:18px;--editor-bg:#070c16;
 }
 [data-theme="sun"]{
@@ -471,15 +471,19 @@ body.has-wp .topbar-sub{text-shadow:none;}
 }
 .notes-search:focus{border-color:var(--accent);}
 .notes-search::placeholder{color:var(--muted);}
-.sub-tabs{display:flex;gap:6px;margin-top:12px;}
+.sub-tabs{display:flex;gap:6px;margin-top:12px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.sub-tabs::-webkit-scrollbar{display:none;}
 .sub-tab{
-  flex:1;padding:9px 4px;border-radius:12px;border:1px solid var(--border);
+  flex:1 0 auto;padding:9px 12px;border-radius:12px;border:1px solid var(--border);
   background:transparent;color:var(--muted);font-size:.68rem;font-weight:900;
   cursor:pointer;text-align:center;transition:.2s;font-family:'Quicksand',sans-serif;
 }
 .sub-tab.active-phy{background:var(--phy);color:#000;border-color:var(--phy);}
 .sub-tab.active-chem{background:var(--chem);color:#000;border-color:var(--chem);}
 .sub-tab.active-bio{background:var(--bio);color:#fff;border-color:var(--bio);}
+.sub-tab.active-eng{background:var(--eng);color:#000;border-color:var(--eng);}
+.sub-tab.active-asm{background:var(--asm);color:#000;border-color:var(--asm);}
+.sub-tab.active-math{background:var(--math);color:#000;border-color:var(--math);}
 
 .chapters-list{padding:14px 16px 96px;}
 .chapter-card{
@@ -496,6 +500,9 @@ body.has-wp .topbar-sub{text-shadow:none;}
 .chapter-card.phy-card::before{background:var(--phy);}
 .chapter-card.chem-card::before{background:var(--chem);}
 .chapter-card.bio-card::before{background:var(--bio);}
+.chapter-card.eng-card::before{background:var(--eng);}
+.chapter-card.asm-card::before{background:var(--asm);}
+.chapter-card.math-card::before{background:var(--math);}
 .chapter-card:active{transform:scale(.98);}
 .chapter-card:hover{border-color:var(--border2);background:var(--surface3);}
 .chapter-num{
@@ -513,10 +520,16 @@ body.has-wp .topbar-sub{text-shadow:none;}
 .chapter-card.phy-card .chapter-num{background:rgba(56,189,248,.15);color:var(--phy);}
 .chapter-card.chem-card .chapter-num{background:rgba(45,212,191,.15);color:var(--chem);}
 .chapter-card.bio-card .chapter-num{background:rgba(129,140,248,.15);color:var(--bio);}
+.chapter-card.eng-card .chapter-num{background:rgba(244,114,182,.15);color:var(--eng);}
+.chapter-card.asm-card .chapter-num{background:rgba(251,146,60,.15);color:var(--asm);}
+.chapter-card.math-card .chapter-num{background:rgba(163,230,53,.15);color:var(--math);}
 
 .chapter-card.phy-card .chapter-badge{background:rgba(56,189,248,.15);color:var(--phy);}
 .chapter-card.chem-card .chapter-badge{background:rgba(45,212,191,.15);color:var(--chem);}
 .chapter-card.bio-card .chapter-badge{background:rgba(129,140,248,.15);color:var(--bio);}
+.chapter-card.eng-card .chapter-badge{background:rgba(244,114,182,.15);color:var(--eng);}
+.chapter-card.asm-card .chapter-badge{background:rgba(251,146,60,.15);color:var(--asm);}
+.chapter-card.math-card .chapter-badge{background:rgba(163,230,53,.15);color:var(--math);}
 
 /* ───── EDITOR FLOAT BAR (replaces removed topbar) ───── */
 .editor-float-bar{
@@ -1050,137 +1063,6 @@ body.has-wp .topbar-sub{text-shadow:none;}
 .streak-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:#f97316;}
 .streak-lbl{font-size:.6rem;color:var(--muted);font-weight:900;letter-spacing:.5px;}
 
-/* ═══════════════════════════════════════
-   HIDE TASK FAB ON TIMELINE, NOTES & EDITOR
-   ═══════════════════════════════════════ */
-body.page-timeline .fab-task,
-body.page-notes .fab-task,
-body.page-editor .fab-task {
-  display: none !important;
-}
-
-/* ═══════════════════════════════════════
-   FLOATING TASK BUTTON + PANEL
-   ═══════════════════════════════════════ */
-.fab-task{
-  position:fixed;bottom:84px;right:18px;z-index:500;
-  width:54px;height:54px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#f59e0b);
-  border:none;cursor:pointer;
-  box-shadow:0 4px 20px rgba(251,191,36,.4),0 2px 8px rgba(0,0,0,.4);
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;transition:.2s;
-  animation:fab-breathe 3s ease-in-out infinite;
-}
-.fab-task:active{transform:scale(.9);}
-@keyframes fab-breathe{
-  0%,100%{box-shadow:0 4px 20px rgba(251,191,36,.4),0 2px 8px rgba(0,0,0,.4);}
-  50%{box-shadow:0 4px 28px rgba(251,191,36,.65),0 2px 8px rgba(0,0,0,.4);}
-}
-.fab-badge{
-  position:absolute;top:-4px;right:-4px;
-  background:#ef4444;color:#fff;
-  font-size:.5rem;font-weight:900;font-family:'Orbitron',sans-serif;
-  min-width:18px;height:18px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 4px;border:2px solid var(--bg);
-}
-.fab-badge.hidden{display:none;}
-.task-backdrop{
-  position:fixed;inset:0;z-index:600;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
-  opacity:0;pointer-events:none;transition:opacity .3s;
-}
-.task-backdrop.show{opacity:1;pointer-events:all;}
-.task-panel{
-  position:fixed;bottom:0;left:0;right:0;z-index:700;
-  background:var(--surface2);border-top:1px solid var(--border);
-  border-radius:24px 24px 0 0;
-  padding:0 0 env(safe-area-inset-bottom,16px);
-  transform:translateY(100%);transition:transform .35s cubic-bezier(.32,1,.28,1);
-  max-height:88dvh;display:flex;flex-direction:column;
-}
-.task-panel.show{transform:translateY(0);}
-.task-panel-handle{
-  width:40px;height:4px;border-radius:2px;background:var(--border2);
-  margin:10px auto 0;flex-shrink:0;
-}
-.task-panel-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px 12px;flex-shrink:0;border-bottom:1px solid var(--border);
-}
-.task-panel-title{font-family:'Orbitron',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--text);}
-.task-panel-date{font-size:.6rem;color:var(--accent);letter-spacing:1px;margin-top:3px;}
-.task-close{
-  width:32px;height:32px;border-radius:50%;background:var(--surface3);
-  border:1px solid var(--border);color:var(--muted);font-size:1rem;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;
-}
-.task-close:active{transform:scale(.9);}
-.task-input-row{display:flex;gap:10px;padding:14px 16px 8px;flex-shrink:0;}
-.task-input{
-  flex:1;background:var(--surface3);border:1px solid var(--border2);
-  border-radius:14px;padding:12px 16px;color:var(--text);
-  font-family:'Quicksand',sans-serif;font-size:.88rem;font-weight:700;
-  outline:none;transition:border-color .2s;
-}
-.task-input:focus{border-color:var(--accent);}
-.task-input::placeholder{color:var(--muted);}
-.task-add-btn{
-  width:44px;height:44px;border-radius:12px;flex-shrink:0;align-self:center;
-  background:linear-gradient(135deg,var(--accent),#f59e0b);
-  border:none;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;
-  justify-content:center;transition:.15s;color:#000;
-  box-shadow:0 2px 10px rgba(251,191,36,.35);
-}
-.task-add-btn:active{transform:scale(.9);}
-.task-priority-row{display:flex;gap:6px;padding:0 16px 12px;flex-shrink:0;}
-.priority-chip{
-  padding:5px 12px;border-radius:20px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-size:.62rem;font-weight:900;
-  cursor:pointer;font-family:'Quicksand',sans-serif;transition:.15s;letter-spacing:.5px;
-}
-.priority-chip.sel-high{background:rgba(239,68,68,.2);color:#ef4444;border-color:#ef4444;}
-.priority-chip.sel-mid{background:rgba(251,191,36,.2);color:var(--accent);border-color:var(--accent);}
-.priority-chip.sel-low{background:rgba(34,197,94,.2);color:#22c55e;border-color:#22c55e;}
-.task-progress-wrap{padding:0 16px 10px;flex-shrink:0;}
-.task-progress-label{font-size:.6rem;color:var(--muted);font-weight:800;margin-bottom:5px;display:flex;justify-content:space-between;}
-.task-progress-bar{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;}
-.task-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#22c55e);border-radius:2px;transition:width .4s ease;}
-.task-list-wrap{flex:1;overflow-y:auto;padding:6px 16px 16px;-webkit-overflow-scrolling:touch;}
-.task-empty{text-align:center;padding:36px 20px;color:var(--muted);font-size:.8rem;font-weight:700;}
-.task-empty-icon{font-size:2.4rem;display:block;margin-bottom:10px;opacity:.5;}
-.task-item{
-  display:flex;align-items:center;gap:12px;
-  background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:13px 14px;margin-bottom:8px;transition:opacity .2s;
-  animation:task-in .25s ease;
-}
-@keyframes task-in{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.task-item.done{opacity:.45;}
-.task-item.done .task-text{text-decoration:line-through;color:var(--muted);}
-.task-chk{
-  width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);
-  flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:.2s;background:transparent;font-size:.75rem;color:transparent;
-}
-.task-chk.checked{background:var(--accent);border-color:var(--accent);color:#000;}
-.task-body{flex:1;min-width:0;}
-.task-text{font-size:.85rem;font-weight:700;color:var(--text);word-break:break-word;line-height:1.4;}
-.task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;}
-.task-priority-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.dot-high{background:#ef4444;}
-.dot-mid{background:var(--accent);}
-.dot-low{background:#22c55e;}
-.task-time{font-size:.58rem;color:var(--muted);font-weight:700;}
-.task-del{
-  width:28px;height:28px;border-radius:8px;border:none;
-  background:transparent;color:var(--muted);font-size:.9rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;
-}
-.task-del:hover{background:rgba(239,68,68,.15);color:#ef4444;}
-.task-del:active{transform:scale(.9);}
-
 /* ───── OVERLAYS ───── */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
@@ -1395,9 +1277,12 @@ select.edit-input{appearance:auto;}
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;"><div class="notes-hero-title" style="margin-bottom:0;">📚 CHAPTER NOTES</div><button class="add-chapter-btn" style="width:auto;margin:0;padding:8px 14px;" onclick="openChapterDialog()">＋ ADD</button></div>
       <input type="text" class="notes-search" placeholder="Search chapters..." oninput="searchChapters(this.value)">
       <div class="sub-tabs">
-        <button class="sub-tab active-phy" onclick="filterSubject('phy',event)">PHYSICS</button>
-        <button class="sub-tab" onclick="filterSubject('chem',event)">CHEMISTRY</button>
-        <button class="sub-tab" onclick="filterSubject('bio',event)">BIOLOGY</button>
+        <button class="sub-tab active-phy" data-sub="phy" onclick="filterSubject('phy',event)">PHYSICS</button>
+        <button class="sub-tab" data-sub="chem" onclick="filterSubject('chem',event)">CHEMISTRY</button>
+        <button class="sub-tab" data-sub="bio" onclick="filterSubject('bio',event)">BIOLOGY</button>
+        <button class="sub-tab" data-sub="eng" onclick="filterSubject('eng',event)">ENGLISH</button>
+        <button class="sub-tab" data-sub="asm" onclick="filterSubject('asm',event)">ASSAMESE</button>
+        <button class="sub-tab" data-sub="math" onclick="filterSubject('math',event)">MATHEMATICS</button>
       </div>
     </div>
     <div class="scroll-area" style="padding-top:0;">
@@ -1618,6 +1503,33 @@ select.edit-input{appearance:auto;}
                 </div>
                 <div style="height:5px;border-radius:3px;background:var(--border2);overflow:hidden;">
                   <div id="bioBar" style="height:100%;border-radius:3px;background:var(--bio);width:0%;transition:width 1s ease;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                  <span style="font-size:.6rem;font-weight:900;color:var(--eng);">📖 ENGLISH</span>
+                  <span id="engPct" style="font-size:.6rem;color:var(--muted);">0%</span>
+                </div>
+                <div style="height:5px;border-radius:3px;background:var(--border2);overflow:hidden;">
+                  <div id="engBar" style="height:100%;border-radius:3px;background:var(--eng);width:0%;transition:width 1s ease;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                  <span style="font-size:.6rem;font-weight:900;color:var(--asm);">🗣️ ASSAMESE</span>
+                  <span id="asmPct" style="font-size:.6rem;color:var(--muted);">0%</span>
+                </div>
+                <div style="height:5px;border-radius:3px;background:var(--border2);overflow:hidden;">
+                  <div id="asmBar" style="height:100%;border-radius:3px;background:var(--asm);width:0%;transition:width 1s ease;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                  <span style="font-size:.6rem;font-weight:900;color:var(--math);">📐 MATHEMATICS</span>
+                  <span id="mathPct" style="font-size:.6rem;color:var(--muted);">0%</span>
+                </div>
+                <div style="height:5px;border-radius:3px;background:var(--border2);overflow:hidden;">
+                  <div id="mathBar" style="height:100%;border-radius:3px;background:var(--math);width:0%;transition:width 1s ease;"></div>
                 </div>
               </div>
             </div>
@@ -1861,7 +1773,7 @@ select.edit-input{appearance:auto;}
     <div class="edit-field">
       <div class="edit-label">SUBJECT</div>
       <select class="edit-input" id="chSub" onchange="onChapterSubjectChange()">
-        <option>Physics</option><option>Chemistry</option><option>Biology</option>
+        <option>Physics</option><option>Chemistry</option><option>Biology</option><option>English</option><option>Assamese</option><option>Mathematics</option>
       </select>
     </div>
     <div class="edit-field">
@@ -2383,7 +2295,7 @@ setInterval(updateDashboard, 30000);
 // OVERALL PROGRESS GRAPHIC
 // ═══════════════════════════════════════
 function renderProgress(){
-  const subs={Physics:{key:'phy',total:0,done:0},Chemistry:{key:'chem',total:0,done:0},Biology:{key:'bio',total:0,done:0}};
+  const subs={Physics:{key:'phy',total:0,done:0},Chemistry:{key:'chem',total:0,done:0},Biology:{key:'bio',total:0,done:0},English:{key:'eng',total:0,done:0},Assamese:{key:'asm',total:0,done:0},Mathematics:{key:'math',total:0,done:0}};
   const phases={};
   tasks.forEach(t=>{
     const s=subs[t.sub];
@@ -2409,7 +2321,7 @@ function renderProgress(){
   if(el('overallPct'))el('overallPct').textContent=pct+'%';
   if(el('overallLabel'))el('overallLabel').textContent=`${done} of ${total} topics completed`;
 
-  ['Physics','Chemistry','Biology'].forEach(sub=>{
+  ['Physics','Chemistry','Biology','English','Assamese','Mathematics'].forEach(sub=>{
     const {key,total:t,done:d}=subs[sub];
     const p=t?Math.round(d/t*100):0;
     if(el(key+'Pct'))el(key+'Pct').textContent=p+'%';
@@ -2684,8 +2596,9 @@ function toggleMission(idx,done){
   updateActiveMissions();
 }
 
-function getSubCol(s){return s==='Physics'?'var(--phy)':s==='Chemistry'?'var(--chem)':'var(--bio)';}
-function getSubIcon(s){return s==='Physics'?'⚛️':s==='Chemistry'?'🧪':'🧬';}
+function getSubCol(s){return 'var(--'+(SUBKEY[s]||'bio')+')';}
+const SUBICON={Physics:'⚛️',Chemistry:'🧪',Biology:'🧬',English:'📖',Assamese:'🗣️',Mathematics:'📐'};
+function getSubIcon(s){return SUBICON[s]||'📚';}
 function fmtDate(d){return parseLocalDate(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});}
 
 // ═══════════════════════════════════════
@@ -2693,8 +2606,8 @@ function fmtDate(d){return parseLocalDate(d).toLocaleDateString('en-GB',{day:'2-
 // ═══════════════════════════════════════
 let activeChapterTitle='';
 let _chapterQuery='';
-const SUBMAP={phy:'Physics',chem:'Chemistry',bio:'Biology'};
-const SUBKEY={Physics:'phy',Chemistry:'chem',Biology:'bio'};
+const SUBMAP={phy:'Physics',chem:'Chemistry',bio:'Biology',eng:'English',asm:'Assamese',math:'Mathematics'};
+const SUBKEY={Physics:'phy',Chemistry:'chem',Biology:'bio',English:'eng',Assamese:'asm',Mathematics:'math'};
 function decodeHtml(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value;}
 function getChapters(sub){
   return tasks.filter(t=>t.sub===SUBMAP[sub]).slice().sort((a,b)=>a.start.localeCompare(b.start))
@@ -2805,9 +2718,9 @@ function refreshChapterViews(){
   saveTasks();
   renderTimeline();
   // sync notes subject tabs
-  document.querySelectorAll('.sub-tab').forEach((b,i)=>{
+  document.querySelectorAll('.sub-tab').forEach(b=>{
     b.className='sub-tab';
-    if(['phy','chem','bio'][i]===currentSubject)b.classList.add('active-'+currentSubject);
+    if(b.dataset.sub===currentSubject)b.classList.add('active-'+currentSubject);
   });
   renderChapters();
   updateActiveMissions();
@@ -2823,8 +2736,8 @@ function openChapter(sub,id){
   if(!chapter)return;
   activeKey=`note_${sub}_${id}`;
   activeChapterTitle=decodeHtml(chapter.title);
-  document.getElementById('editorChapterTitle').textContent=`${sub.toUpperCase()} Ch.${chapter.num}: ${activeChapterTitle}`;
-  const colors={phy:'#38bdf8',chem:'#2dd4bf',bio:'#818cf8'};
+  document.getElementById('editorChapterTitle').textContent=`${(SUBMAP[sub]||sub).toUpperCase()} Ch.${chapter.num}: ${activeChapterTitle}`;
+  const colors={phy:'#38bdf8',chem:'#2dd4bf',bio:'#818cf8',eng:'#f472b6',asm:'#fb923c',math:'#a3e635'};
   document.getElementById('editorColorDot').style.background=colors[sub];
   
   const saved=localStorage.getItem(activeKey)||`<h1>${chapter.title}</h1><p>Start taking notes here...</p>`;
@@ -4109,9 +4022,6 @@ function updateAndroidBarColor(isDark) {
 history.pushState({page:'dashboard'},'');
 
 window.addEventListener('popstate',function(e){
-  // Close task panel first if open
-  const tp=document.getElementById('taskPanel');
-  if(tp&&tp.classList.contains('show')){closeTaskPanel();history.pushState({},'');return;}
   // If any overlay/dialog is open, close it first
   const overlays=['linkBackdrop','tableBackdrop'];
   for(const id of overlays){
@@ -4140,192 +4050,6 @@ window.addEventListener('popstate',function(e){
   // Already on dashboard — push state again to prevent app exit on next back tap
   history.pushState({page:'dashboard'},'');
 });
-</script>
-
-<!-- ═══ FLOATING TASK BUTTON ═══ -->
-<button class="fab-task" id="fabTask" onclick="openTaskPanel()" title="Tomorrow's Tasks">
-  📋
-  <span class="fab-badge hidden" id="fabBadge">0</span>
-</button>
-
-<!-- ═══ TASK PANEL BACKDROP ═══ -->
-<div class="task-backdrop" id="taskBackdrop" onclick="closeTaskPanel()"></div>
-
-<!-- ═══ TASK PANEL ═══ -->
-<div class="task-panel" id="taskPanel">
-  <div class="task-panel-handle"></div>
-  <div class="task-panel-head">
-    <div>
-      <div class="task-panel-title">⚡ TOMORROW'S TASKS</div>
-      <div class="task-panel-date" id="tomorrowDateLabel"></div>
-    </div>
-    <button class="task-close" onclick="closeTaskPanel()">✕</button>
-  </div>
-  <div class="task-input-row">
-    <input class="task-input" id="taskInput" type="text" placeholder="Add a task for tomorrow..." maxlength="120"
-      onkeydown="if(event.key==='Enter')addTask()">
-    <button class="task-add-btn" onclick="addTask()">＋</button>
-  </div>
-  <div class="task-priority-row">
-    <button class="priority-chip sel-high" id="prio-high" onclick="selectPrio('high')">🔴 HIGH</button>
-    <button class="priority-chip"          id="prio-mid"  onclick="selectPrio('mid')">🟡 MID</button>
-    <button class="priority-chip"          id="prio-low"  onclick="selectPrio('low')">🟢 LOW</button>
-  </div>
-  <div class="task-progress-wrap" id="taskProgressWrap" style="display:none">
-    <div class="task-progress-label">
-      <span>PROGRESS</span>
-      <span id="taskProgressTxt">0 / 0 done</span>
-    </div>
-    <div class="task-progress-bar"><div class="task-progress-fill" id="taskProgressFill" style="width:0%"></div></div>
-  </div>
-  <div class="task-list-wrap" id="taskListWrap">
-    <div class="task-empty" id="taskEmpty">
-      <span class="task-empty-icon">🗒️</span>
-      No tasks yet — add something for tomorrow!
-    </div>
-  </div>
-</div>
-
-<script>
-// ═══════════════════════════════════════
-// TOMORROW TASK PANEL
-// ═══════════════════════════════════════
-(function(){
-  const STORAGE_KEY = 'hs_tomorrow_tasks';
-  const ARCHIVE_KEY = 'hs_tasks_archive';
-  let _tasks = [];
-  let selectedPrio = 'high';
-
-  function dateKey(d){ return d.toISOString().slice(0,10); }
-  function getTomorrow(){ const d=new Date(); d.setDate(d.getDate()+1); return d; }
-  function getTomorrowKey(){ return dateKey(getTomorrow()); }
-
-  function labelFromKey(key){
-    const [y,m,d]=key.split('-').map(Number);
-    return new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  }
-
-  function archiveIfNeeded(stored){
-    if(!stored||!stored.date||!stored.tasks||!stored.tasks.length) return;
-    const today=dateKey(new Date());
-    if(stored.date<today){
-      try{
-        const arch=JSON.parse(localStorage.getItem(ARCHIVE_KEY))||{};
-        if(!arch[stored.date]) arch[stored.date]=stored.tasks;
-        localStorage.setItem(ARCHIVE_KEY,JSON.stringify(arch));
-      }catch(e){}
-    }
-  }
-
-  function loadTasks(){
-    try{
-      const raw=JSON.parse(localStorage.getItem(STORAGE_KEY));
-      archiveIfNeeded(raw);
-      _tasks=(raw&&raw.date===getTomorrowKey())?raw.tasks||[]:[];
-    }catch(e){ _tasks=[]; }
-  }
-
-  function saveTasks(){
-    localStorage.setItem(STORAGE_KEY,JSON.stringify({date:getTomorrowKey(),tasks:_tasks}));
-  }
-
-  function updateBadge(){
-    const pending=_tasks.filter(t=>!t.done).length;
-    const badge=document.getElementById('fabBadge');
-    if(!badge) return;
-    if(pending>0){ badge.textContent=pending>9?'9+':pending; badge.classList.remove('hidden'); }
-    else{ badge.classList.add('hidden'); }
-  }
-
-  function updateProgress(){
-    const wrap=document.getElementById('taskProgressWrap');
-    const fill=document.getElementById('taskProgressFill');
-    const txt=document.getElementById('taskProgressTxt');
-    if(!wrap) return;
-    if(_tasks.length===0){ wrap.style.display='none'; return; }
-    wrap.style.display='block';
-    const done=_tasks.filter(t=>t.done).length;
-    const pct=Math.round((done/_tasks.length)*100);
-    fill.style.width=pct+'%';
-    txt.textContent=done+' / '+_tasks.length+' done';
-  }
-
-  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function renderTasks(){
-    const wrap=document.getElementById('taskListWrap');
-    const empty=document.getElementById('taskEmpty');
-    if(!wrap) return;
-    wrap.querySelectorAll('.task-item').forEach(el=>el.remove());
-    if(_tasks.length===0){ empty.style.display=''; updateProgress(); updateBadge(); return; }
-    empty.style.display='none';
-    const dotC={high:'dot-high',mid:'dot-mid',low:'dot-low'};
-    const prioL={high:'HIGH',mid:'MID',low:'LOW'};
-    _tasks.forEach((t,i)=>{
-      const el=document.createElement('div');
-      el.className='task-item'+(t.done?' done':'');
-      el.innerHTML=`
-        <div class="task-chk${t.done?' checked':''}" onclick="window._taskToggle(${i})">${t.done?'✓':''}</div>
-        <div class="task-body">
-          <div class="task-text">${escH(t.text)}</div>
-          <div class="task-meta">
-            <div class="task-priority-dot ${dotC[t.prio]||'dot-mid'}"></div>
-            <span class="task-time">${prioL[t.prio]||'MID'} · ${t.time}</span>
-          </div>
-        </div>
-        <button class="task-del" onclick="window._taskDelete(${i})">🗑</button>`;
-      wrap.appendChild(el);
-    });
-    updateProgress();
-    updateBadge();
-  }
-
-  window._taskToggle=function(i){ _tasks[i].done=!_tasks[i].done; saveTasks(); renderTasks(); };
-  window._taskDelete=function(i){ _tasks.splice(i,1); saveTasks(); renderTasks(); };
-
-  window.selectPrio=function(p){
-    selectedPrio=p;
-    ['high','mid','low'].forEach(k=>{
-      const el=document.getElementById('prio-'+k);
-      if(!el) return;
-      el.className='priority-chip'+(k===p?' sel-'+k:'');
-    });
-  };
-
-  window.addTask=function(){
-    const inp=document.getElementById('taskInput');
-    if(!inp) return;
-    const text=inp.value.trim();
-    if(!text) return;
-    const now=new Date();
-    _tasks.push({text,prio:selectedPrio,done:false,
-      time:now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});
-    inp.value='';
-    saveTasks(); renderTasks();
-    inp.focus();
-  };
-
-  window.openTaskPanel=function(){
-    loadTasks();
-    const lbl=document.getElementById('tomorrowDateLabel');
-    if(lbl) lbl.textContent=labelFromKey(getTomorrowKey());
-    document.getElementById('taskPanel').classList.add('show');
-    document.getElementById('taskBackdrop').classList.add('show');
-    document.body.style.overflow='hidden';
-    renderTasks();
-    setTimeout(()=>{ const inp=document.getElementById('taskInput'); if(inp) inp.focus(); },350);
-  };
-
-  window.closeTaskPanel=function(){
-    document.getElementById('taskPanel').classList.remove('show');
-    document.getElementById('taskBackdrop').classList.remove('show');
-    document.body.style.overflow='';
-  };
-
-  // Init
-  loadTasks();
-  updateBadge();
-})();
 </script>
 
 <textarea id="noteInput" placeholder="Write note..." style="display:none"></textarea>
@@ -4376,6 +4100,9 @@ window.addEventListener('popstate',function(e){
 <!-- Gemini floating AI button -->
 <style>
 #ai-fab{position:fixed;bottom:84px;left:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#0d47a1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform .2s;box-shadow:0 4px 16px rgba(26,115,232,0.45)}
+#ai-fab{touch-action:none;user-select:none;-webkit-user-select:none;}
+#ai-fab.dragging{transition:none;cursor:grabbing;transform:scale(1.12);}
+#ai-fab.snap{transition:left .25s cubic-bezier(.22,1,.36,1),top .25s cubic-bezier(.22,1,.36,1),transform .2s;}
 #ai-fab:hover{transform:scale(1.1)}
 #ai-fab:active{transform:scale(0.95)}
 #ai-fab svg{width:24px;height:24px}
@@ -4413,7 +4140,7 @@ window.addEventListener('popstate',function(e){
     <button onclick="toggleAI()">&times;</button>
   </div>
   <div id="ai-messages">
-    <div class="ai-msg bot">Hi! Ask me anything about Physics, Chemistry, Biology or your schedule 🚀</div>
+    <div class="ai-msg bot">Hi! Ask me anything about Physics, Chemistry, Biology, English, Assamese, Mathematics or your schedule 🚀</div>
   </div>
   <div id="ai-input-row">
     <input id="ai-input" type="text" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendMsg()"/>
@@ -4422,11 +4149,142 @@ window.addEventListener('popstate',function(e){
 </div>
 
 <script>
-const GROQ_KEY = "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";
+const GROQ_KEYS = [
+  "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",
+  "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",
+  "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",
+  "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"   // old key, last-resort fallback
+];
+let groqKeyIdx = 0;   // key currently in use; moves forward when one is rate-limited / rejected
+
+// Calls Groq; if a key is rate-limited (429), out of quota or rejected (401/403), switches to the next key and retries.
+const GROQ_URL = "https://api.groq.com/openai/v1";
+const GROQ_MODEL_PREF = ["llama-3.3-70b-versatile","openai/gpt-oss-120b","llama-3.1-8b-instant","openai/gpt-oss-20b",
+  "meta-llama/llama-4-scout-17b-16e-instruct","meta-llama/llama-4-maverick-17b-128e-instruct","qwen/qwen3-32b","gemma2-9b-it"];
+const groqModelFor = {};   // key index -> model that actually works for that key
+
+// Asks Groq which models this key can use and picks the best chat model.
+async function groqPickModel(idx, exclude){
+  try{
+    const r = await fetch(GROQ_URL + "/models", { headers:{ "Authorization":"Bearer " + GROQ_KEYS[idx] } });
+    if(!r.ok) return null;
+    const ids = ((await r.json()).data || []).map(m => m.id)
+      .filter(id => !/whisper|guard|tts|playai|orpheus|embed|distil-whisper/i.test(id) && id !== exclude);
+    return GROQ_MODEL_PREF.find(m => ids.includes(m)) || ids[0] || null;
+  }catch(_){ return null; }
+}
+
+// Calls Groq. Rate-limited / rejected key -> next key. Unavailable model -> auto-picks one the key can use.
+async function groqChat(payload){
+  let lastErr = null, limitHits = 0, netFails = 0;
+  for (let tried = 0; tried < GROQ_KEYS.length; tried++){
+    const idx = (groqKeyIdx + tried) % GROQ_KEYS.length;
+    let model = groqModelFor[idx] || payload.model, modelRetried = false;
+    while (true){
+      let res;
+      try {
+        res = await fetch(GROQ_URL + "/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + GROQ_KEYS[idx] },
+          body: JSON.stringify({ ...payload, model })
+        });
+      } catch(e){ netFails++; lastErr = e; break; }          // never reached Groq
+      if (res.ok){ groqKeyIdx = idx; groqModelFor[idx] = model; return await res.json(); }
+      let msg = "API error " + res.status;
+      try { const e = await res.json(); msg = e.error?.message || msg; } catch(_){}
+      lastErr = new Error(msg);
+      if (/model/i.test(msg) && /does not exist|not found|no access|decommission|not supported|deprecated/i.test(msg) && !modelRetried){
+        modelRetried = true;
+        const alt = await groqPickModel(idx, model);
+        if (alt){ model = alt; continue; }                   // retry this key with an available model
+        break;                                               // nothing usable on this key -> next key
+      }
+      const limited = res.status === 429 || res.status === 401 || res.status === 403 ||
+                      /rate limit|quota|limit exceeded|exceeded/i.test(msg);
+      if (limited){ limitHits++; break; }                    // next key
+      throw lastErr;                                         // other errors: show as-is
+    }
+  }
+  if (netFails && !limitHits && lastErr instanceof TypeError)
+    throw new Error("Can't reach the AI server (api.groq.com). Check your internet, turn off any ad-blocker/VPN/firewall for this page, or try another network.");
+  if (limitHits)
+    throw new Error("All API keys are rate-limited right now. Please try again in a bit. (" + (lastErr ? lastErr.message : "") + ")");
+  throw lastErr || new Error("AI request failed.");
+}
 
 function toggleAI() {
   document.getElementById("ai-chat").classList.toggle("open");
 }
+
+// ===== DRAGGABLE AI BUTTON (snaps to left/right edge, remembers position) =====
+(function(){
+  const fab=document.getElementById('ai-fab'), chat=document.getElementById('ai-chat');
+  if(!fab||!chat) return;
+  const KEY='hs_ai_fab_pos', M=12, SIZE=52;
+  let pos={side:'left',y:null};            // y = fraction of usable height (0..1); null = default spot
+  try{ const p=JSON.parse(localStorage.getItem(KEY)); if(p&&(p.side==='left'||p.side==='right')) pos=p; }catch(e){}
+
+  const vw=()=>document.documentElement.clientWidth, vh=()=>window.innerHeight;
+  const clamp=(v,a,b)=>Math.min(Math.max(v,a),b);
+  const minY=()=>M, maxY=()=>Math.max(M,vh()-SIZE-M);
+
+  function place(){                          // apply saved position
+    const top=pos.y==null ? maxY()-72 : clamp(M+pos.y*(maxY()-M),minY(),maxY());
+    fab.style.bottom='auto'; fab.style.right='auto';
+    fab.style.top=top+'px';
+    fab.style.left=(pos.side==='right'? vw()-SIZE-M : M)+'px';
+    placeChat();
+  }
+  function placeChat(){                      // keep chat window next to the button
+    const r=fab.getBoundingClientRect(), w=Math.min(300,vw()-2*M);
+    chat.style.width=w+'px';
+    chat.style.left=pos.side==='right'? 'auto':M+'px';
+    chat.style.right=pos.side==='right'? M+'px':'auto';
+    const h=chat.classList.contains('open')?chat.offsetHeight:340;
+    const above=r.top-h-10>=M;               // room above the button? else open below it
+    chat.style.top='auto'; chat.style.bottom='auto';
+    if(above) chat.style.bottom=(vh()-r.top+10)+'px';
+    else chat.style.top=clamp(r.bottom+10,M,Math.max(M,vh()-h-M))+'px';
+  }
+  function save(){ try{localStorage.setItem(KEY,JSON.stringify(pos));}catch(e){} }
+
+  let sx,sy,ox,oy,moved=false,drag=false,pid=null,justDragged=false;
+  fab.addEventListener('pointerdown',e=>{
+    if(e.button!==undefined&&e.button!==0) return;
+    pid=e.pointerId; drag=true; moved=false;
+    const r=fab.getBoundingClientRect(); sx=e.clientX; sy=e.clientY; ox=r.left; oy=r.top;
+    try{fab.setPointerCapture(pid);}catch(_){}
+  });
+  fab.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==pid) return;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(!moved && Math.hypot(dx,dy)<6) return;      // small wiggle = still a tap
+    if(!moved){ moved=true; fab.classList.remove('snap'); fab.classList.add('dragging'); }
+    fab.style.left=clamp(ox+dx,0,vw()-SIZE)+'px';
+    fab.style.top=clamp(oy+dy,minY(),maxY())+'px';
+    placeChat();
+  });
+  function end(e){
+    if(!drag||(e&&e.pointerId!==pid)) return;
+    drag=false; try{fab.releasePointerCapture(pid);}catch(_){}
+    fab.classList.remove('dragging');
+    if(!moved) return;
+    justDragged=true; setTimeout(()=>justDragged=false,60);
+    const r=fab.getBoundingClientRect();
+    pos.side=(r.left+SIZE/2<vw()/2)?'left':'right';          // snap to nearest edge
+    pos.y=maxY()>M ? clamp((r.top-M)/(maxY()-M),0,1) : 0;
+    fab.classList.add('snap'); place(); save();
+    setTimeout(()=>fab.classList.remove('snap'),300);
+  }
+  fab.addEventListener('pointerup',end);
+  fab.addEventListener('pointercancel',end);
+  fab.addEventListener('click',e=>{ if(justDragged){e.stopImmediatePropagation();e.preventDefault();} },true);
+
+  // reposition chat after it opens/closes
+  new MutationObserver(placeChat).observe(chat,{attributes:true,attributeFilter:['class']});
+  window.addEventListener('resize',place);
+  place();
+})();
 
 async function sendMsg() {
   const input = document.getElementById("ai-input");
@@ -4441,29 +4299,15 @@ async function sendMsg() {
   msgs.scrollTop = msgs.scrollHeight;
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + GROQ_KEY
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: "You are a helpful study assistant for a student preparing for board exams (Physics, Chemistry, Biology). Keep answers concise, clear and easy to understand." },
-          { role: "user", content: text }
-        ],
-        max_tokens: 1024,
-        temperature: 0.7
-      })
+    const data = await groqChat({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: "You are a helpful study assistant for a student preparing for board exams (Physics, Chemistry, Biology, English, Assamese, Mathematics). Keep answers concise, clear and easy to understand." },
+        { role: "user", content: text }
+      ],
+      max_tokens: 1024,
+      temperature: 0.7
     });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || "API error " + res.status);
-    }
-
-    const data = await res.json();
     const reply = data.choices?.[0]?.message?.content || "No response received.";
     const typingEl = document.getElementById(typingId);
     if (typingEl) {
