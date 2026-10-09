@@ -309,6 +309,27 @@ body.has-wp .topbar-sub{text-shadow:none;}
   border:1px solid rgba(255,255,255,.18);box-shadow:none;
 }
 
+
+/* ───── LIGHT (SUN) THEME + WALLPAPER: wallpaper shown clean, no white overlay ───── */
+body[data-theme="sun"].has-wp .topbar{
+  background:linear-gradient(180deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,0) 100%);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  -webkit-mask-image:linear-gradient(180deg,#000 80%,transparent 100%);mask-image:linear-gradient(180deg,#000 80%,transparent 100%);
+}
+body[data-theme="sun"] #wallpaperDim{background:rgba(255,255,255,calc(var(--wp-dim,.35)*.2));}
+@media(min-width:900px){
+  /* no pills behind greeting / titles (beats the #id plate rule); text stays legible via a soft halo */
+  body.has-wp #page-dashboard .dash-shell .section-title,
+  body.has-wp #page-dashboard .dash-shell .dash-greet{
+    display:block;background:none;border:0;border-radius:0;padding:0;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+  body[data-theme="sun"].has-wp .dash-shell{
+    text-shadow:0 0 2px rgba(255,255,255,.95),0 0 6px rgba(255,255,255,.9),0 1px 14px rgba(255,255,255,.85);
+  }
+  body[data-theme="sun"].has-wp .dash-shell button{text-shadow:none;}
+}
+
 /* BOTTOM DOCK - iOS style floating capsule */
 .bottom-nav{
   display:flex;align-items:center;justify-content:center;gap:2px;
@@ -1255,6 +1276,13 @@ select.edit-input{appearance:auto;}
       <div class="dash-missions">
         <div class="section-title">🎯 ACTIVE MISSIONS</div>
         <div id="activeMissions"></div>
+
+        <div class="tt-head">
+          <div class="section-title" style="margin:0;">📝 TODAY'S TASKS</div>
+          <span class="tt-count" id="ttCount"></span>
+          <button class="tt-add" onclick="ttOpen()">＋ ADD</button>
+        </div>
+        <div id="todayTasks"></div>
       </div>
       </div><!-- /dash-main -->
       </div><!-- /dash-shell -->
@@ -3754,6 +3782,7 @@ function exportAllData(){
     profile:JSON.parse(localStorage.getItem('profile')||'{}'),
     timeline:JSON.parse(localStorage.getItem('timeline')||'{}'),
     tasks:tasks,
+    todayTasks:(typeof ttData!=='undefined'?ttData:null),
     notes:{}
   };
   
@@ -3782,6 +3811,7 @@ function handleImport(e){
       if(data.profile)localStorage.setItem('profile',JSON.stringify(data.profile));
       if(data.timeline)localStorage.setItem('timeline',JSON.stringify(data.timeline));
       if(data.tasks)localStorage.setItem(TASKS_KEY,JSON.stringify(data.tasks));
+      if(data.todayTasks)localStorage.setItem('hs_today_tasks',JSON.stringify(data.todayTasks));
       if(data.notes){
         Object.keys(data.notes).forEach(k=>localStorage.setItem(k,data.notes[k]));
       }
@@ -4559,6 +4589,179 @@ window.addEventListener('load',function(){
   wpBuildChips(); applyWallpaper();
   fInit(); renderDashExtras();
 });
+</script>
+
+<!-- ═══ TODAY'S TASK DIALOG ═══ -->
+<div class="overlay" id="ttOverlay" onclick="if(event.target===this)ttClose()">
+  <div class="overlay-card">
+    <div class="overlay-title" id="ttDlgTitle">NEW TASK</div>
+    <input class="overlay-input" id="ttTitle" placeholder="What do you need to do today?" maxlength="80" autocomplete="off">
+    <div class="tt-seg">
+      <button type="button" id="ttModeRange" class="on" onclick="ttMode('range')">START – END</button>
+      <button type="button" id="ttModeDur" onclick="ttMode('dur')">DURATION</button>
+    </div>
+    <div id="ttRangeBox" class="tt-fields">
+      <label>Start<input type="time" id="ttStart" class="overlay-input"></label>
+      <label>End<input type="time" id="ttEnd" class="overlay-input"></label>
+    </div>
+    <div id="ttDurBox" class="tt-fields" style="display:none;">
+      <label>Hours<input type="number" id="ttH" class="overlay-input" min="0" max="23" placeholder="0" inputmode="numeric"></label>
+      <label>Minutes<input type="number" id="ttM" class="overlay-input" min="0" max="59" placeholder="30" inputmode="numeric"></label>
+      <label style="grid-column:1/-1;">Start time <span style="opacity:.6;font-weight:700;">(optional)</span><input type="time" id="ttDurStart" class="overlay-input"></label>
+    </div>
+    <div class="tt-chips" id="ttChips" style="display:none;">
+      <button type="button" onclick="ttQuick(15)">15m</button><button type="button" onclick="ttQuick(30)">30m</button>
+      <button type="button" onclick="ttQuick(45)">45m</button><button type="button" onclick="ttQuick(60)">1h</button>
+      <button type="button" onclick="ttQuick(90)">1h 30m</button><button type="button" onclick="ttQuick(120)">2h</button>
+    </div>
+    <div class="tt-err" id="ttErr"></div>
+    <div class="overlay-actions">
+      <button class="overlay-btn" onclick="ttClose()">CANCEL</button>
+      <button class="overlay-btn primary" onclick="ttSave()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.tt-head{display:flex;align-items:center;gap:10px;margin:22px 0 10px;}
+.tt-count{font-size:.62rem;font-weight:900;color:var(--muted);letter-spacing:.5px;}
+.tt-add{margin-left:auto;padding:7px 14px;border-radius:999px;border:1px solid var(--accent);background:transparent;
+  color:var(--accent);font-family:'Quicksand',sans-serif;font-weight:900;font-size:.68rem;letter-spacing:.8px;cursor:pointer;transition:.15s;}
+.tt-add:active{transform:scale(.94);}
+.tt-add:hover{background:var(--accent);color:#000;}
+.tt-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:14px;
+  background:var(--surface);border:1px solid var(--border);}
+.tt-row.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+.tt-check{flex:0 0 22px;width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);background:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:#000;font-size:.7rem;font-weight:900;transition:.15s;padding:0;}
+.tt-row.done .tt-check{background:var(--accent);border-color:var(--accent);}
+.tt-body{flex:1;min-width:0;cursor:pointer;}
+.tt-name{font-weight:800;font-size:.92rem;color:var(--text);overflow-wrap:anywhere;}
+.tt-row.done .tt-name{text-decoration:line-through;opacity:.5;}
+.tt-time{margin-top:3px;font-size:.66rem;font-weight:900;letter-spacing:.5px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.tt-now{background:var(--accent);color:#000;border-radius:6px;padding:1px 6px;font-size:.58rem;}
+.tt-del{flex:0 0 auto;background:none;border:0;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px 6px;line-height:1;}
+.tt-del:hover{color:#ef4444;}
+.tt-empty{padding:14px;border-radius:14px;border:1px dashed var(--border2);color:var(--muted);font-size:.8rem;font-weight:700;text-align:center;}
+.tt-seg{display:flex;gap:6px;margin-bottom:12px;}
+.tt-seg button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);
+  font-family:'Quicksand',sans-serif;font-weight:900;font-size:.7rem;letter-spacing:.6px;cursor:pointer;}
+.tt-seg button.on{background:var(--accent);color:#000;border-color:var(--accent);}
+.tt-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;}
+.tt-fields label{font-size:.62rem;font-weight:900;letter-spacing:.5px;color:var(--muted);}
+.tt-fields .overlay-input{margin-top:4px;}
+.tt-chips{display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 12px;}
+.tt-chips button{padding:6px 11px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);
+  font-family:'Quicksand',sans-serif;font-weight:800;font-size:.7rem;cursor:pointer;}
+.tt-chips button:active{transform:scale(.94);}
+.tt-err{min-height:16px;margin:-4px 0 8px;font-size:.72rem;font-weight:800;color:#ef4444;}
+@media(min-width:900px){
+  .dash-shell .tt-row{background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;margin-bottom:0;padding:12px 6px 12px 14px;}
+  .dash-shell .tt-row.now{box-shadow:none;border-left:3px solid var(--accent);}
+  .dash-shell .tt-empty{background:transparent;}
+}
+</style>
+
+<script>
+// ═══ TODAY'S TASKS ═══
+const TT_KEY='hs_today_tasks';
+let ttData={date:'',items:[]};
+let ttEditId=null,ttCurMode='range';
+function ttToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function ttLoad(){
+  try{ttData=JSON.parse(localStorage.getItem(TT_KEY))||{date:'',items:[]};}catch(e){ttData={date:'',items:[]};}
+  if(!Array.isArray(ttData.items))ttData.items=[];
+  if(ttData.date!==ttToday()){ttData={date:ttToday(),items:[]};ttSaveData();}   // new day = fresh list
+}
+function ttSaveData(){try{localStorage.setItem(TT_KEY,JSON.stringify(ttData));}catch(e){}}
+function ttMin(t){if(!t)return null;const p=t.split(':');return (+p[0])*60+(+p[1]);}
+function ttFmt(t){if(!t)return '';const p=t.split(':');let h=+p[0];const m=p[1];const ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+m+' '+ap;}
+function ttDur(m){const h=Math.floor(m/60),r=m%60;return (h?h+'h':'')+(h&&r?' ':'')+(r?r+'m':(h?'':'0m'));}
+function ttSpan(t){            // [startMin,endMin] or null
+  const s=ttMin(t.start);if(s==null)return null;
+  const e=t.end?ttMin(t.end):(t.dur?s+t.dur:null);
+  return e==null?null:[s,e];
+}
+function ttRender(){
+  if(ttData.date!==ttToday())ttLoad();
+  const box=document.getElementById('todayTasks');if(!box)return;
+  const items=[...ttData.items].sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    const sa=ttMin(a.start),sb=ttMin(b.start);
+    if(sa!=null&&sb!=null)return sa-sb;
+    if(sa!=null)return -1;if(sb!=null)return 1;
+    return a.id-b.id;
+  });
+  const done=ttData.items.filter(t=>t.done).length;
+  document.getElementById('ttCount').textContent=ttData.items.length?done+'/'+ttData.items.length+' DONE':'';
+  if(!items.length){box.innerHTML='<div class="tt-empty">No tasks for today. Tap ＋ ADD to plan your day.</div>';return;}
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes();
+  box.innerHTML=items.map(t=>{
+    const sp=ttSpan(t),isNow=!t.done&&sp&&nm>=sp[0]&&nm<sp[1];
+    let time='';
+    if(t.start&&t.end)time='🕒 '+ttFmt(t.start)+' – '+ttFmt(t.end)+' · '+ttDur(ttMin(t.end)-ttMin(t.start));
+    else if(t.start&&t.dur)time='🕒 '+ttFmt(t.start)+' · ⏱ '+ttDur(t.dur);
+    else if(t.dur)time='⏱ '+ttDur(t.dur);
+    return '<div class="tt-row'+(t.done?' done':'')+(isNow?' now':'')+'">'
+      +'<button class="tt-check" onclick="ttToggle('+t.id+')" aria-label="Toggle done">'+(t.done?'✓':'')+'</button>'
+      +'<div class="tt-body" onclick="ttOpen('+t.id+')"><div class="tt-name">'+escHtml(t.title)+'</div>'
+      +(time||isNow?'<div class="tt-time">'+(isNow?'<span class="tt-now">NOW</span>':'')+(time?'<span>'+time+'</span>':'')+'</div>':'')+'</div>'
+      +'<button class="tt-del" onclick="ttDelete('+t.id+')" aria-label="Delete">✕</button></div>';
+  }).join('');
+}
+function ttToggle(id){const t=ttData.items.find(x=>x.id===id);if(!t)return;t.done=!t.done;ttSaveData();ttRender();if(typeof haptic==='function')haptic(8);}
+function ttDelete(id){ttData.items=ttData.items.filter(x=>x.id!==id);ttSaveData();ttRender();}
+function ttMode(m){
+  ttCurMode=m;
+  document.getElementById('ttModeRange').classList.toggle('on',m==='range');
+  document.getElementById('ttModeDur').classList.toggle('on',m==='dur');
+  document.getElementById('ttRangeBox').style.display=m==='range'?'grid':'none';
+  document.getElementById('ttDurBox').style.display=m==='dur'?'grid':'none';
+  document.getElementById('ttChips').style.display=m==='dur'?'flex':'none';
+}
+function ttQuick(min){document.getElementById('ttH').value=Math.floor(min/60)||'';document.getElementById('ttM').value=min%60||'';}
+function ttOpen(id){
+  ttEditId=typeof id==='number'?id:null;
+  const t=ttEditId?ttData.items.find(x=>x.id===ttEditId):null;
+  document.getElementById('ttDlgTitle').textContent=t?'EDIT TASK':'NEW TASK';
+  document.getElementById('ttErr').textContent='';
+  document.getElementById('ttTitle').value=t?t.title:'';
+  ['ttStart','ttEnd','ttH','ttM','ttDurStart'].forEach(i=>document.getElementById(i).value='');
+  if(t&&t.end){ttMode('range');document.getElementById('ttStart').value=t.start;document.getElementById('ttEnd').value=t.end;}
+  else if(t&&t.dur){ttMode('dur');document.getElementById('ttH').value=Math.floor(t.dur/60)||'';document.getElementById('ttM').value=t.dur%60||'';document.getElementById('ttDurStart').value=t.start||'';}
+  else ttMode('range');
+  document.getElementById('ttOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('ttTitle').focus(),50);
+}
+function ttClose(){document.getElementById('ttOverlay').classList.remove('show');ttEditId=null;}
+function ttSave(){
+  const err=m=>{document.getElementById('ttErr').textContent=m;};
+  const title=document.getElementById('ttTitle').value.trim();
+  if(!title)return err('Please enter a task name.');
+  let start='',end='',dur=0;
+  if(ttCurMode==='range'){
+    start=document.getElementById('ttStart').value;end=document.getElementById('ttEnd').value;
+    if(start&&!end)return err('Add an end time, or switch to Duration.');
+    if(!start&&end)return err('Add a start time too.');
+    if(start&&end&&ttMin(end)<=ttMin(start))return err('End time must be after the start time.');
+  }else{
+    const h=parseInt(document.getElementById('ttH').value)||0,m=parseInt(document.getElementById('ttM').value)||0;
+    dur=h*60+m;start=document.getElementById('ttDurStart').value;
+    if(dur<=0)return err('Enter a duration (hours and/or minutes).');
+  }
+  const rec={title,start,end,dur,done:false};
+  if(ttEditId){const t=ttData.items.find(x=>x.id===ttEditId);if(t)Object.assign(t,rec,{done:t.done});}
+  else ttData.items.push({id:Date.now(),...rec});
+  ttSaveData();ttClose();ttRender();
+}
+document.addEventListener('keydown',e=>{
+  const o=document.getElementById('ttOverlay');
+  if(!o||!o.classList.contains('show'))return;
+  if(e.key==='Escape')ttClose();
+  if(e.key==='Enter'&&e.target&&e.target.tagName==='INPUT')ttSave();
+});
+ttLoad();ttRender();
+setInterval(ttRender,60000);        // refresh NOW badge / midnight rollover
 </script>
 </body>
 </html>
