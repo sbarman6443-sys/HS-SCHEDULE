@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#f0f6ff" media="(prefers-color-scheme: light)">
 
 <title>HS SCHEDULE v42.0</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Quicksand:wght@500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Quicksand:wght@500;700;800&family=JetBrains+Mono:wght@400;700&family=Lexend:wght@400;600;800&family=Inter:wght@400;600;800&family=Poppins:wght@400;600;800&family=Atkinson+Hyperlegible:wght@400;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@500;700&family=Caveat:wght@500;700&family=Noto+Sans+Bengali:wght@400;600;800&family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#030508;--surface:rgba(12,18,35,0.9);--surface2:#0c1223;--surface3:#111827;
@@ -1397,13 +1397,30 @@ select.edit-input{appearance:auto;}
           <option value="6">XL</option>
           <option value="7">XXL</option>
         </select>
-        <select class="tb-select" id="fontFamilySelect" onchange="applyFontFamily(this.value)" title="Font family" style="max-width:90px;">
+        <select class="tb-select" id="fontFamilySelect" onchange="applyFontFamily(this.value)" title="Font family" style="max-width:104px;">
           <option value="">Font</option>
-          <option value="Quicksand,sans-serif">Quicksand</option>
-          <option value="Georgia,serif">Georgia</option>
-          <option value="'JetBrains Mono',monospace">Mono</option>
-          <option value="Arial,sans-serif">Arial</option>
-          <option value="'Times New Roman',serif">Times</option>
+          <optgroup label="Modern">
+            <option value="'Lexend',sans-serif" style="font-family:'Lexend',sans-serif">Lexend</option>
+            <option value="'Inter',sans-serif" style="font-family:'Inter',sans-serif">Inter</option>
+            <option value="'Poppins',sans-serif" style="font-family:'Poppins',sans-serif">Poppins</option>
+            <option value="'Atkinson Hyperlegible',sans-serif" style="font-family:'Atkinson Hyperlegible',sans-serif">Hyperlegible</option>
+            <option value="Quicksand,sans-serif" style="font-family:Quicksand,sans-serif">Quicksand</option>
+            <option value="Arial,sans-serif" style="font-family:Arial,sans-serif">Arial</option>
+          </optgroup>
+          <optgroup label="Serif">
+            <option value="'Merriweather',serif" style="font-family:'Merriweather',serif">Merriweather</option>
+            <option value="'Playfair Display',serif" style="font-family:'Playfair Display',serif">Playfair</option>
+            <option value="Georgia,serif" style="font-family:Georgia,serif">Georgia</option>
+            <option value="'Times New Roman',serif" style="font-family:'Times New Roman',serif">Times</option>
+          </optgroup>
+          <optgroup label="Assamese / Bengali">
+            <option value="'Noto Sans Bengali',sans-serif" style="font-family:'Noto Sans Bengali',sans-serif">অসমীয়া Sans</option>
+            <option value="'Noto Serif Bengali',serif" style="font-family:'Noto Serif Bengali',serif">অসমীয়া Serif</option>
+          </optgroup>
+          <optgroup label="Fun">
+            <option value="'Caveat',cursive" style="font-family:'Caveat',cursive">Caveat (handwriting)</option>
+            <option value="'JetBrains Mono',monospace" style="font-family:'JetBrains Mono',monospace">Mono</option>
+          </optgroup>
         </select>
         <div class="tb-sep"></div>
         <span class="tb-label">HEAD</span>
@@ -1443,6 +1460,20 @@ select.edit-input{appearance:auto;}
         <button class="tb" onclick="fmt('justifyLeft')" title="Align left">⬅</button>
         <button class="tb" onclick="fmt('justifyCenter')" title="Center">⬌</button>
         <button class="tb" onclick="fmt('justifyRight')" title="Align right">➡</button>
+        <div class="tb-sep"></div>
+        <span class="tb-label">SPACING</span>
+        <select class="tb-select" id="lineSpaceSelect" onchange="applyLineSpacing(this.value)" title="Line spacing" style="max-width:92px;">
+          <option value="">↕ Line</option>
+          <optgroup label="Selected text">
+            <option value="1">Tight · 1.0</option><option value="1.25">Compact · 1.25</option><option value="1.5">Normal · 1.5</option>
+            <option value="1.75">Relaxed · 1.75</option><option value="2">Double · 2.0</option><option value="2.5">Wide · 2.5</option><option value="3">Extra wide · 3.0</option>
+            <option value="reset">Reset to default</option>
+          </optgroup>
+          <optgroup label="Whole note">
+            <option value="all:1.25">All · 1.25</option><option value="all:1.5">All · 1.5</option><option value="all:1.75">All · 1.75</option>
+            <option value="all:2">All · 2.0</option><option value="all:2.5">All · 2.5</option><option value="all:reset">All · reset</option>
+          </optgroup>
+        </select>
       </div>
       <!-- Row 3: Insert elements -->
       <div class="toolbar-row">
@@ -1455,6 +1486,7 @@ select.edit-input{appearance:auto;}
         <button class="tb" onclick="triggerImageUpload()" title="Insert image">🖼 Image</button>
         <button class="tb" onclick="insertMathFormula()" title="Math formula" style="color:#818cf8">∑ Math</button>
         <button class="tb" onclick="insertSpoiler()" title="Spoiler/hidden block" style="color:#2dd4bf">👁 Spoiler</button>
+        <button class="tb" onclick="spOpen()" title="Smart Paste &amp; Bold: bold chosen words, keep formatting when pasting" style="color:#fbbf24">✨ Smart Bold</button>
         <div class="tb-sep"></div>
         <span class="tb-label">CALLOUT</span>
         <button class="tb" onclick="insertCallout('info')" title="Info callout" style="color:#38bdf8">ℹ Info</button>
@@ -3987,23 +4019,8 @@ function runNotationScan(){
     const ec=document.getElementById('editorContent');
     if(!ec){setTimeout(wire,100);return;}
 
-    // PASTE: strip styles, render markdown
-    ec.addEventListener('paste',function(e){
-      e.preventDefault();
-      const clip=e.clipboardData||window.clipboardData;
-      let text=clip.getData('text/plain');
-      if(!text){
-        const html=clip.getData('text/html')||'';
-        const tmp=document.createElement('div');tmp.innerHTML=html;
-        text=tmp.innerText||tmp.textContent||'';
-      }
-      if(!text)return;
-      // Detect if text contains markdown patterns; render if so
-      const hasMd=/^#{1,3}\s|^\*\s|^-\s|\*\*|__|\`|^\d+\.\s/m.test(text);
-      const html=hasMd?markdownToHtml(text):text.split(/\r?\n/).map(l=>l===''?'<br>':'<p>'+escHtml(l)+'</p>').join('');
-      document.execCommand('insertHTML',false,html);
-      scheduleAutoSave();
-    });
+    // PASTE: smart paste (keeps real bold/italic/lists, renders markdown, optional auto-bold)
+    ec.addEventListener('paste',function(e){ smartPaste(e); });
 
     // TYPING: notation scan debounced
     let _notTimer=null;
@@ -4762,6 +4779,242 @@ document.addEventListener('keydown',e=>{
 });
 ttLoad();ttRender();
 setInterval(ttRender,60000);        // refresh NOW badge / midnight rollover
+</script>
+
+<!-- ═══ SMART BOLD / SMART PASTE ═══ -->
+<div class="overlay" id="spOverlay" onclick="if(event.target===this)spClose()">
+  <div class="overlay-card">
+    <div class="overlay-title">✨ SMART BOLD &amp; PASTE</div>
+    <div class="sp-hint">Type the words or phrases you want in <b>bold</b> (separate with commas or new lines).</div>
+    <textarea class="overlay-input" id="spWords" rows="3" placeholder="e.g. Newton's law, Formula, Important, Definition" style="resize:vertical;font-family:inherit;"></textarea>
+    <button class="overlay-btn primary" style="width:100%;margin:2px 0 6px;" onclick="spBoldNow()">BOLD THESE WORDS IN MY NOTE</button>
+    <div class="sp-hint" style="margin:0 0 10px;">Applies to the text you selected, or the whole note if nothing is selected.</div>
+    <div class="sp-sep"></div>
+    <label class="sp-opt"><input type="checkbox" id="spKeep"> <span><b>Keep formatting when pasting</b><br><small>Bold, italic, headings, lists, links and tables from websites, Word &amp; Docs. Colours, fonts and backgrounds are stripped.</small></span></label>
+    <label class="sp-opt"><input type="checkbox" id="spAuto"> <span><b>Auto-bold my words on every paste</b><br><small>Uses the word list above.</small></span></label>
+    <label class="sp-opt"><input type="checkbox" id="spTerms"> <span><b>Auto-bold the term before a colon</b><br><small>“Photosynthesis: the process…” → <b>Photosynthesis</b>: the process…</small></span></label>
+    <div class="sp-msg" id="spMsg"></div>
+    <div class="overlay-actions">
+      <button class="overlay-btn" onclick="spClose()">CLOSE</button>
+      <button class="overlay-btn primary" onclick="spSaveOpts(true)">SAVE SETTINGS</button>
+    </div>
+  </div>
+</div>
+<style>
+.sp-hint{font-size:.74rem;font-weight:700;color:var(--muted);margin-bottom:8px;line-height:1.45;}
+.sp-sep{height:1px;background:var(--border);margin:6px 0 12px;}
+.sp-opt{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px;cursor:pointer;font-size:.8rem;color:var(--text);line-height:1.4;}
+.sp-opt input{margin-top:3px;width:17px;height:17px;accent-color:var(--accent);flex:0 0 auto;}
+.sp-opt small{color:var(--muted);font-weight:700;font-size:.7rem;}
+.sp-msg{min-height:18px;margin:0 0 8px;font-size:.76rem;font-weight:800;color:var(--accent);}
+</style>
+
+<script>
+// ═══ SMART PASTE / SMART BOLD / LINE SPACING ═══
+const SP_KEY='hs_paste_opts';
+const SP_BLOCKS='p,li,h1,h2,h3,h4,blockquote,div,pre';
+let spLast=null;                         // last selection inside the editor (survives toolbar focus changes)
+document.addEventListener('selectionchange',()=>{
+  const ec=document.getElementById('editorContent'),sel=getSelection();
+  if(ec&&sel.rangeCount&&ec.contains(sel.anchorNode))spLast=sel.getRangeAt(0).cloneRange();
+});
+function spOpts(){
+  let o={};try{o=JSON.parse(localStorage.getItem(SP_KEY))||{};}catch(e){}
+  return {keep:o.keep!==false,terms:!!o.terms,auto:!!o.auto,words:typeof o.words==='string'?o.words:''};
+}
+function spWordList(str){return (str||'').split(/[,\n;]+/).map(w=>w.trim()).filter(Boolean);}
+function spSaveOpts(msg){
+  const o={keep:spKeep.checked,terms:spTerms.checked,auto:spAuto.checked,words:spWords.value};
+  try{localStorage.setItem(SP_KEY,JSON.stringify(o));}catch(e){}
+  if(msg)spSay('Settings saved ✓');
+}
+function spSay(t){document.getElementById('spMsg').textContent=t;}
+function spOpen(){
+  const o=spOpts();
+  spKeep.checked=o.keep;spTerms.checked=o.terms;spAuto.checked=o.auto;spWords.value=o.words;spSay('');
+  document.getElementById('spOverlay').classList.add('show');
+}
+function spClose(){spSaveOpts(false);document.getElementById('spOverlay').classList.remove('show');}
+
+/* wrap every occurrence of the words in <strong>, inside root; returns match count */
+function spBoldWords(root,words){
+  words=words.map(w=>w.trim()).filter(Boolean).sort((a,b)=>b.length-a.length);
+  if(!words.length)return 0;
+  const esc=w=>w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const re=new RegExp('(?<![\\p{L}\\p{M}\\p{N}_])('+words.map(esc).join('|')+')(?![\\p{L}\\p{M}\\p{N}_])','giu');
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const nodes=[];let n;
+  while((n=walker.nextNode())){
+    const p=n.parentElement;
+    if(!p||p.closest('strong,b,code,pre,a,.math-formula,[contenteditable="false"],script,style'))continue;
+    nodes.push(n);
+  }
+  let count=0;
+  nodes.forEach(node=>{
+    const text=node.nodeValue;re.lastIndex=0;
+    if(!re.test(text))return;
+    re.lastIndex=0;
+    const frag=document.createDocumentFragment();let last=0,m;
+    while((m=re.exec(text))){
+      if(m.index>last)frag.appendChild(document.createTextNode(text.slice(last,m.index)));
+      const st=document.createElement('strong');st.textContent=m[0];frag.appendChild(st);
+      last=m.index+m[0].length;count++;
+      if(m[0].length===0)re.lastIndex++;
+    }
+    if(last<text.length)frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag,node);
+  });
+  return count;
+}
+/* "Term: explanation" -> bold the term */
+function spBoldTerms(root){
+  root.querySelectorAll('p,li,blockquote,div').forEach(el=>{
+    const n=el.firstChild;if(!n||n.nodeType!==3)return;
+    const m=n.nodeValue.match(/^(\s*)([^:：\n]{2,45}?)(\s*[:：])(\s|$)/);
+    if(!m)return;
+    const term=m[2];
+    if(/https?|www\.|\.$/i.test(term)||term.split(/\s+/).length>6||/[.!?]\s/.test(term))return;
+    const st=document.createElement('strong');st.textContent=term;
+    const rest=document.createTextNode(n.nodeValue.slice(m[1].length+term.length));
+    const lead=document.createTextNode(m[1]);
+    el.insertBefore(rest,n);el.insertBefore(st,rest);if(m[1])el.insertBefore(lead,st);el.removeChild(n);
+  });
+}
+function spBoldNow(){
+  const ec=document.getElementById('editorContent');
+  const words=spWordList(spWords.value);
+  if(!words.length){spSay('Type at least one word first.');return;}
+  if(ec.classList.contains('view-mode')||ec.getAttribute('contenteditable')==='false'){spSay('Switch to edit mode first.');return;}
+  spSaveOpts(false);
+  let count=0;
+  const r=spLast;
+  if(r&&!r.collapsed&&ec.contains(r.commonAncestorContainer)){
+    const box=document.createElement('div');box.appendChild(r.cloneContents());
+    count=spBoldWords(box,words);
+    if(count){
+      const sel=getSelection();sel.removeAllRanges();sel.addRange(r);ec.focus();
+      document.execCommand('insertHTML',false,box.innerHTML);
+    }
+  }else{
+    count=spBoldWords(ec,words);
+  }
+  if(count){scheduleAutoSave();spSay('Bolded '+count+' match'+(count>1?'es':'')+' ✓');}
+  else spSay('No matches found.');
+}
+
+/* ---- rich-paste sanitizer ---- */
+function spSanitize(html){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const bold=el=>{const w=(el.style&&el.style.fontWeight)||'';return w==='bold'||w==='bolder'||parseInt(w)>=600;};
+  const isBlk=el=>/^(P|DIV|UL|OL|LI|H[1-6]|BLOCKQUOTE|PRE|TABLE|SECTION|ARTICLE)$/.test(el.tagName);
+  function walk(node,inPre){
+    if(node.nodeType===3){
+      let t=node.nodeValue;
+      if(!inPre){
+        if(!t.trim()&&node.parentElement&&/^(UL|OL|TABLE|TBODY|THEAD|TR)$/.test(node.parentElement.tagName))return '';
+        t=t.replace(/\s+/g,' ');
+      }
+      return esc(t);
+    }
+    if(node.nodeType!==1)return '';
+    const tag=node.tagName;
+    if(/^(STYLE|SCRIPT|META|IMG|SVG|HEAD|TITLE|LINK|NOSCRIPT|IFRAME|CANVAS|VIDEO|AUDIO)$/.test(tag))return '';
+    const pre=inPre||tag==='PRE';
+    const kids=()=>Array.from(node.childNodes).map(c=>walk(c,pre)).join('');
+    const c=kids();
+    switch(tag){
+      case 'B':case 'STRONG':return (node.style&&/^(normal|400|300)$/.test(node.style.fontWeight))?c:(c.trim()?'<strong>'+c+'</strong>':c);
+      case 'I':case 'EM':return c.trim()?'<em>'+c+'</em>':c;
+      case 'U':return c.trim()?'<u>'+c+'</u>':c;
+      case 'S':case 'DEL':case 'STRIKE':return c.trim()?'<s>'+c+'</s>':c;
+      case 'SUP':case 'SUB':case 'MARK':case 'CODE':return c?'<'+tag.toLowerCase()+'>'+c+'</'+tag.toLowerCase()+'>':'';
+      case 'BR':return '<br>';
+      case 'HR':return '<hr>';
+      case 'P':return c.replace(/<br>/g,'').trim()?'<p>'+c+'</p>':'';
+      case 'DIV':case 'SECTION':case 'ARTICLE':
+        return Array.from(node.children).some(isBlk)?c:(c.trim()?'<p>'+c+'</p>':'');
+      case 'H1':return '<h1>'+c+'</h1>';case 'H2':return '<h2>'+c+'</h2>';case 'H3':return '<h3>'+c+'</h3>';
+      case 'H4':case 'H5':case 'H6':return '<h4>'+c+'</h4>';
+      case 'UL':case 'OL':return '<'+tag.toLowerCase()+'>'+c+'</'+tag.toLowerCase()+'>';
+      case 'LI':return '<li>'+c+'</li>';
+      case 'BLOCKQUOTE':return '<blockquote>'+c+'</blockquote>';
+      case 'PRE':return '<pre><code>'+c+'</code></pre>';
+      case 'A':{const h=node.getAttribute('href')||'';return /^(https?:|mailto:)/i.test(h)&&c.trim()?'<a href="'+h.replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">'+c+'</a>':c;}
+      case 'TABLE':case 'THEAD':case 'TBODY':case 'TR':return '<'+tag.toLowerCase()+'>'+c+'</'+tag.toLowerCase()+'>';
+      case 'TH':case 'TD':return '<'+tag.toLowerCase()+' contenteditable="true">'+c+'</'+tag.toLowerCase()+'>';
+      case 'SPAN':case 'FONT':{
+        let o=c;if(!o.trim())return o;
+        if(node.style){
+          if(node.style.textDecoration&&/underline/.test(node.style.textDecoration))o='<u>'+o+'</u>';
+          if(node.style.fontStyle==='italic')o='<em>'+o+'</em>';
+          if(bold(node))o='<strong>'+o+'</strong>';
+        }
+        return o;
+      }
+      default:return c;
+    }
+  }
+  const box=document.createElement('div');
+  box.innerHTML=walk(doc.body,false);
+  box.querySelectorAll('li>p').forEach(p=>{while(p.firstChild)p.parentNode.insertBefore(p.firstChild,p);p.remove();});
+  box.querySelectorAll('strong>strong,em>em,u>u').forEach(x=>{while(x.firstChild)x.parentNode.insertBefore(x.firstChild,x);x.remove();});
+  box.querySelectorAll('p:empty,li:empty').forEach(x=>x.remove());
+  return box.innerHTML;
+}
+const SP_RICH_RE=/<(b|strong|i|em|u|h[1-6]|ul|ol|li|table|a)[\s>]|font-weight\s*:\s*(bold|[6-9]00)|font-style\s*:\s*italic/i;
+function smartPaste(e){
+  e.preventDefault();
+  const clip=e.clipboardData||window.clipboardData;if(!clip)return;
+  const o=spOpts();
+  const html=clip.getData('text/html')||'';
+  let text=clip.getData('text/plain')||'';
+  let out='';
+  if(o.keep&&html&&SP_RICH_RE.test(html)){try{out=spSanitize(html);}catch(err){out='';}}
+  if(!out||!out.trim()){
+    if(!text){const t=document.createElement('div');t.innerHTML=html;text=t.innerText||t.textContent||'';}
+    if(!text)return;
+    const hasMd=/^#{1,3}\s|^\*\s|^-\s|\*\*|__|\`|^\d+\.\s/m.test(text);
+    out=hasMd?markdownToHtml(text):text.split(/\r?\n/).map(l=>l===''?'<br>':'<p>'+escHtml(l)+'</p>').join('');
+  }
+  const box=document.createElement('div');box.innerHTML=out;
+  if(o.terms)spBoldTerms(box);
+  if(o.auto){const w=spWordList(o.words);if(w.length)spBoldWords(box,w);}
+  document.execCommand('insertHTML',false,box.innerHTML);
+  scheduleAutoSave();
+}
+
+/* ---- line spacing ---- */
+function spLeafBlocks(root){
+  return Array.from(root.querySelectorAll(SP_BLOCKS)).filter(el=>
+    !el.querySelector(SP_BLOCKS)&&!el.closest('.img-outer,.img-wrap,table'));
+}
+function applyLineSpacing(val){
+  const sel0=document.getElementById('lineSpaceSelect');if(sel0)sel0.value='';
+  if(!val)return;
+  const ec=document.getElementById('editorContent');if(!ec)return;
+  const all=val.startsWith('all:');
+  const v=all?val.slice(4):val;
+  const set=el=>{if(v==='reset')el.style.removeProperty('line-height');else el.style.lineHeight=v;};
+  if(all){spLeafBlocks(ec).forEach(set);scheduleAutoSave();return;}
+  let r=null;const sel=getSelection();
+  if(sel.rangeCount&&ec.contains(sel.anchorNode))r=sel.getRangeAt(0);else r=spLast;
+  if(!r)return;
+  ec.focus();
+  let blocks=spLeafBlocks(ec).filter(el=>r.intersectsNode(el));
+  if(!blocks.length){                                   // bare text directly in the editor -> wrap in <p> first
+    const s2=getSelection();s2.removeAllRanges();s2.addRange(r);
+    document.execCommand('formatBlock',false,'p');
+    blocks=spLeafBlocks(ec).filter(el=>getSelection().rangeCount&&getSelection().getRangeAt(0).intersectsNode(el));
+  }
+  if(r.collapsed&&blocks.length>1)blocks=[blocks[0]];   // caret only: just the current paragraph
+  blocks.forEach(set);
+  scheduleAutoSave();
+}
+document.addEventListener('keydown',e=>{
+  const o=document.getElementById('spOverlay');
+  if(o&&o.classList.contains('show')&&e.key==='Escape')spClose();
+});
 </script>
 </body>
 </html>
